@@ -302,9 +302,10 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       </div>
       <p class="gdrive-info">Sincroniza tus datos automáticamente con Google Drive. Así funcionará igual en todos tus dispositivos. Solo necesitas un Client ID gratuito de Google.</p>
       <div class="gdrive-setup" id="gd-setup">
-        <p>1. Ve a <strong style="color:var(--gold-l);">console.cloud.google.com</strong> → Crea un proyecto → APIs → Google Drive API → Credenciales → OAuth 2.0 → Aplicación web.<br>
-        2. En "Orígenes autorizados" añade <strong style="color:var(--gold-l);">http://localhost</strong> y <strong style="color:var(--gold-l);">null</strong> (para abrir desde archivo local).<br>
-        3. Copia el Client ID y pégalo aquí:</p>
+        <p>1. Ve a <strong style="color:var(--gold-l);">console.cloud.google.com</strong> → tu proyecto → APIs → Google Drive API → Credenciales → OAuth 2.0 → Aplicación web.<br>
+        2. En "Orígenes de JavaScript autorizados" añade la URL donde tienes alojada la app (ej: <strong style="color:var(--gold-l);">https://tu-usuario.github.io</strong>).<br>
+        3. No hace falta añadir URIs de redirección.<br>
+        4. Copia el Client ID y pégalo aquí:</p>
         <input type="text" id="gd-client-id-input" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
       </div>
       <div class="io-row" style="margin-top:.6rem;">
@@ -882,10 +883,170 @@ document.getElementById('btn-nuke').onclick=()=>{
 document.body.addEventListener('dragover', e=>e.preventDefault());
 
 // ─── GOOGLE DRIVE ─────────────────────────────────────────────
-const GD_KEY = 'gp_gdrive_v1'; // stores {clientId, accessToken, fileId}
+// Uses Google Identity Services (GIS) - the current Google OAuth standard
+const GD_KEY = 'gp_gdrive_v2';
 let gd = {clientId:'', accessToken:'', fileId:''};
 const GD_FILENAME = 'gamepicker_data.json';
 const GD_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+
+let tokenClient = null;
+let gisLoaded = false;
+
+function loadGD(){
+  try{ const r=localStorage.getItem(GD_KEY); if(r) gd=JSON.parse(r); }catch(e){}
+  if(gd.clientId) document.getElementById('gd-client-id-input').value = gd.clientId;
+  updateGDUI();
+}
+function saveGD(){ try{localStorage.setItem(GD_KEY,JSON.stringify(gd));}catch(e){} }
+
+function updateGDUI(){
+  const connected = !!gd.accessToken;
+  document.getElementById('gd-dot').className = 'gdrive-dot '+(connected?'connected':'disconnected');
+  const txt = document.getElementById('gd-status-text');
+  txt.className = 'gdrive-status-text '+(connected?'connected':'disconnected');
+  txt.textContent = connected ? 'Google Drive — Conectado ✓' : 'Google Drive — No conectado';
+  document.getElementById('gd-setup').style.display = connected?'none':'';
+  document.getElementById('gd-connect-btn').style.display = connected?'none':'';
+  document.getElementById('gd-save-btn').style.display = connected?'':'none';
+  document.getElementById('gd-load-btn').style.display = connected?'':'none';
+  document.getElementById('gd-disconnect-btn').style.display = connected?'':'none';
+}
+
+// Load Google Identity Services script dynamically
+function loadGIS(){
+  return new Promise((resolve)=>{
+    if(gisLoaded){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = ()=>{ gisLoaded=true; resolve(); };
+    s.onerror = ()=>{ toast('Error cargando Google Identity Services','⚠'); };
+    document.head.appendChild(s);
+  });
+}
+
+async function gdConnect(){
+  const clientId = document.getElementById('gd-client-id-input').value.trim();
+  if(!clientId){ toast('Pega primero tu Client ID','⚠'); return; }
+  gd.clientId = clientId; saveGD();
+
+  await loadGIS();
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: GD_SCOPE,
+    callback: (resp)=>{
+      if(resp.error){ toast('Error al conectar: '+resp.error,'⚠'); return; }
+      gd.accessToken = resp.access_token;
+      gd.fileId = '';
+      saveGD(); updateGDUI();
+      toast('¡Google Drive conectado!','☁');
+      gdFindFile();
+    }
+  });
+
+  tokenClient.requestAccessToken({prompt:'consent'});
+}
+
+async function gdRequest(method, url, body, isJson=true){
+  const headers = {'Authorization': `Bearer ${gd.accessToken}`};
+  if(isJson && body) headers['Content-Type'] = 'application/json';
+  const opts = {method, headers};
+  if(body) opts.body = isJson ? JSON.stringify(body) : body;
+  const r = await fetch(url, opts);
+  if(r.status===401){
+    // Token expired - request new one silently
+    if(tokenClient){
+      tokenClient.requestAccessToken({prompt:''});
+      toast('Reconectando con Drive...','☁');
+    } else {
+      gdDisconnect();
+      toast('Sesión expirada, vuelve a conectar','⚠');
+    }
+    return null;
+  }
+  return r;
+}
+
+async function gdFindFile(){
+  const r = await gdRequest('GET',
+    `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${GD_FILENAME}'&fields=files(id,name)`
+  );
+  if(!r) return;
+  const data = await r.json();
+  if(data.files && data.files.length>0){
+    gd.fileId = data.files[0].id;
+    saveGD();
+  }
+}
+
+async function gdSave(){
+  const payload = JSON.stringify(st, null, 2);
+  try{
+    if(!gd.fileId){
+      // Create new file in appDataFolder using multipart upload
+      const boundary = '-------gamePickerBoundary';
+      const meta = JSON.stringify({name: GD_FILENAME, parents: ['appDataFolder']});
+      const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${boundary}--`;
+      const r = await gdRequest('POST',
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+        body, false
+      );
+      if(!r) return;
+      // Set content type manually for multipart
+      const headers = {'Authorization':`Bearer ${gd.accessToken}`,'Content-Type':`multipart/related; boundary=${boundary}`};
+      const r2 = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+        {method:'POST', headers, body});
+      const data = await r2.json();
+      gd.fileId = data.id; saveGD();
+    } else {
+      // Update existing
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gd.fileId}?uploadType=media`,{
+        method:'PATCH',
+        headers:{'Authorization':`Bearer ${gd.accessToken}`,'Content-Type':'application/json'},
+        body: payload
+      });
+    }
+    toast('Guardado en Google Drive','☁');
+  }catch(e){ toast('Error al guardar en Drive','⚠'); console.error(e); }
+}
+
+async function gdLoad(){
+  if(!gd.fileId){ await gdFindFile(); }
+  if(!gd.fileId){ toast('No hay datos guardados en Drive todavía','⚠'); return; }
+  try{
+    const r = await gdRequest('GET',
+      `https://www.googleapis.com/drive/v3/files/${gd.fileId}?alt=media`
+    );
+    if(!r) return;
+    const data = await r.json();
+    if(data.available && Array.isArray(data.available)){
+      st = data;
+      if(!st.meta) st.meta={};
+      if(!st.history) st.history=[];
+      save(); renderAll();
+      toast('Datos cargados desde Drive','☁');
+    } else { toast('Archivo en Drive no reconocido','⚠'); }
+  }catch(e){ toast('Error al cargar desde Drive','⚠'); console.error(e); }
+}
+
+function gdDisconnect(){
+  if(gd.accessToken && gisLoaded){
+    try{ google.accounts.oauth2.revoke(gd.accessToken); }catch(e){}
+  }
+  gd.accessToken=''; gd.fileId=''; saveGD(); updateGDUI();
+  toast('Desconectado de Google Drive','↺');
+}
+
+document.getElementById('gd-connect-btn').onclick = gdConnect;
+document.getElementById('gd-save-btn').onclick = gdSave;
+document.getElementById('gd-load-btn').onclick = gdLoad;
+document.getElementById('gd-disconnect-btn').onclick = gdDisconnect;
+
+// ─── INIT ─────────────────────────────────────────────────────
+loadImgs();
+load();
+loadGD();
+renderAll();
 
 function loadGD(){
   try{ const r=localStorage.getItem(GD_KEY); if(r) gd=JSON.parse(r); }catch(e){}
