@@ -193,6 +193,12 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 
 /* Drag over */
 .drag-over{border-color:var(--gold) !important;box-shadow:0 0 20px var(--gold-glow) !important;}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;align-items:center;}
+.filter-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text4);margin-right:2px;}
+.ftag{font-family:'Cinzel',serif;font-size:9px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);cursor:pointer;background:var(--ink3);color:var(--text3);text-transform:uppercase;letter-spacing:.05em;transition:all .15s;}
+.ftag:hover{border-color:var(--gold-d);color:var(--text2);}
+.ftag.active{border-width:1.5px;}
+.filter-info{font-size:12px;color:var(--text3);font-style:italic;margin-bottom:.8rem;padding:6px 10px;background:var(--ink3);border-radius:8px;border:1px solid var(--border);}
 .emoji-grid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:1rem;max-height:130px;overflow-y:auto;padding:4px 2px;}
 .emoji-opt{font-size:20px;width:34px;height:34px;border-radius:7px;border:1px solid var(--border2);background:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
 .emoji-opt:hover{border-color:var(--gold-d);background:var(--ink4);}
@@ -259,6 +265,10 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <button class="btn sm confirm" id="btn-confirm" style="display:none;">✓ Confirmar</button>
       <button class="btn sm ghost" id="btn-cancel" style="display:none;">✕ Cancelar</button>
     </div>
+    <div class="filter-row" id="filter-row">
+      <span class="filter-lbl">Filtrar</span>
+    </div>
+    <div class="filter-info" id="filter-info" style="display:none;"></div>
     <div class="sec">Esta semana</div>
     <div class="picked-box" id="picked-box">
       <p class="picked-empty" id="pe">Pulsa <em>"Tirar los dados"</em> para que el destino elija por ti...</p>
@@ -573,13 +583,69 @@ function handleImageUpload(file, name, onDone){
 }
 
 // ─── ACTIONS ─────────────────────────────────────────────────
+let activeFilters = new Set();
+
+function buildFilterRow(){
+  const row = document.getElementById('filter-row');
+  row.innerHTML = '<span class="filter-lbl">Filtrar</span>';
+  TAGS.forEach(t=>{
+    const btn = document.createElement('button');
+    btn.className = 'ftag' + (activeFilters.has(t.id)?' active':'');
+    btn.textContent = t.l;
+    btn.dataset.id = t.id;
+    if(activeFilters.has(t.id)){
+      btn.style.background = t.bg;
+      btn.style.color = t.tc;
+      btn.style.borderColor = t.bc;
+    }
+    btn.onclick = ()=>{
+      if(activeFilters.has(t.id)){
+        activeFilters.delete(t.id);
+        btn.classList.remove('active');
+        btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
+      } else {
+        activeFilters.add(t.id);
+        btn.classList.add('active');
+        btn.style.background=t.bg; btn.style.color=t.tc; btn.style.borderColor=t.bc;
+      }
+      updateFilterInfo();
+    };
+    row.appendChild(btn);
+  });
+}
+
+function getFilteredPool(){
+  if(activeFilters.size===0) return [...st.available];
+  return st.available.filter(g=>{
+    const meta = st.meta[g];
+    if(!meta||!meta.tags||!meta.tags.length) return false;
+    return [...activeFilters].some(f => meta.tags.includes(f));
+  });
+}
+
+function updateFilterInfo(){
+  const info = document.getElementById('filter-info');
+  if(activeFilters.size===0){ info.style.display='none'; return; }
+  const pool = getFilteredPool();
+  const tagNames = [...activeFilters].map(id=>TAGS.find(t=>t.id===id)?.l).join(', ');
+  info.style.display='';
+  info.textContent = pool.length > 0
+    ? `${pool.length} juego${pool.length!==1?'s':''} disponible${pool.length!==1?'s':''} con etiqueta: ${tagNames}`
+    : `⚠ Ningún juego disponible tiene las etiquetas: ${tagNames}`;
+}
+
 function pickGames(){
   const n=parseInt(document.getElementById('np').value);
-  if(!st.available.length){toast('No hay juegos disponibles','⚠');return;}
+  const pool = getFilteredPool();
+  if(!pool.length){
+    if(activeFilters.size>0) toast('Ningún juego disponible con esos filtros','⚠');
+    else toast('No hay juegos disponibles','⚠');
+    return;
+  }
   const ov=document.getElementById('roll-ov'); ov.classList.add('show');
   setTimeout(()=>{
     ov.classList.remove('show');
-    st.picked=shuffle([...st.available]).slice(0,Math.min(n,st.available.length));
+    st.picked=shuffle(pool).slice(0,Math.min(n,pool.length));
     save(); renderAll();
     document.getElementById('btn-confirm').style.display='';
     document.getElementById('btn-cancel').style.display='';
@@ -1046,6 +1112,7 @@ document.getElementById('gd-disconnect-btn').onclick = gdDisconnect;
 loadImgs();
 load();
 loadGD();
+buildFilterRow();
 renderAll();
 
 function loadGD(){
