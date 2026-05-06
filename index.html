@@ -146,6 +146,27 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 .note-area:focus{border-color:var(--gold-d);}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem;}
 
+/* RATING & STATUS IN MODAL */
+.modal-row{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+.modal-field{flex:1;min-width:120px;}
+.modal-field .note-lbl{margin-bottom:6px;}
+.star-row{display:flex;gap:3px;}
+.star{font-size:22px;cursor:pointer;opacity:.3;transition:opacity .15s,transform .15s;line-height:1;}
+.star.on{opacity:1;}
+.star:hover{transform:scale(1.2);}
+.status-sel{font-family:'Cinzel',serif;font-size:11px;width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--ink3);color:var(--text);outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.status-sel:focus{border-color:var(--gold-d);}
+
+/* STATS ON CARD */
+.gcard-stats{display:flex;justify-content:space-between;align-items:center;padding:0 8px 6px;margin-top:-2px;}
+.gcard-rating{font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.03em;}
+.gcard-plays{font-size:11px;color:var(--text2);font-family:'Cinzel',serif;font-weight:700;}
+.gcard-lastplayed{font-size:10px;color:var(--text3);padding:0 8px 6px;font-family:'Crimson Pro',serif;}
+.gcard-status-badge{display:inline-block;font-size:7.5px;padding:1px 6px;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;letter-spacing:.04em;margin:0 8px 5px;border:1px solid;}
+.status-unplayed{background:#1a0d00;color:#F0997B;border-color:#993C1D;}
+.status-learning{background:#041228;color:#85B7EB;border-color:#185FA5;}
+.status-mastered{background:#061509;color:#81C784;border-color:#2E7D32;}
+
 /* HISTORY */
 .hist-entry{background:var(--ink3);border-radius:12px;border:1px solid var(--border);padding:12px 14px;margin-bottom:9px;animation:fadeUp .3s ease both;}
 .hist-date{font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:var(--gold-d);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
@@ -364,6 +385,32 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
     <input type="file" id="img-file-input" accept="image/*" style="display:none;">
     <h3 id="modal-title"></h3>
     <p class="msub">Etiquetas y notas personales</p>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="note-lbl">Puntuación</div>
+        <div class="star-row" id="star-row">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+          <span class="star" data-v="6">★</span>
+          <span class="star" data-v="7">★</span>
+          <span class="star" data-v="8">★</span>
+          <span class="star" data-v="9">★</span>
+          <span class="star" data-v="10">★</span>
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="note-lbl">Estado</div>
+        <select class="status-sel" id="status-sel">
+          <option value="">— Sin clasificar —</option>
+          <option value="unplayed">Sin estrenar</option>
+          <option value="learning">Aprendido</option>
+          <option value="mastered">Dominado</option>
+        </select>
+      </div>
+    </div>
     <div class="note-lbl" style="margin-bottom:6px;">Icono <span style="color:var(--text4);font-weight:400;font-family:'Crimson Pro',serif;text-transform:none;letter-spacing:0;">(solo para juegos sin portada)</span></div>
     <div class="emoji-grid" id="emoji-grid"></div>
     <div class="tag-grid" id="tag-grid"></div>
@@ -700,10 +747,17 @@ function pickGames(){
 function confirmPlayed(){
   if(!st.picked.length) return;
   const date=new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const dateShort=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'});
   st.history.unshift({date, games:[...st.picked]});
   st.picked.forEach(g=>{
     const i=st.available.indexOf(g); if(i>-1) st.available.splice(i,1);
     if(!st.played.includes(g)) st.played.push(g);
+    // Update play count and last played
+    if(!st.meta[g]) st.meta[g]={tags:[],note:'',emoji:'',rating:0,status:''};
+    st.meta[g].plays = (st.meta[g].plays||0)+1;
+    st.meta[g].lastPlayed = dateShort;
+    // Auto-update status from unplayed to learning on first play
+    if(!st.meta[g].status || st.meta[g].status==='unplayed') st.meta[g].status='learning';
   });
   st.picked=[]; save(); renderAll();
   document.getElementById('btn-confirm').style.display='none';
@@ -735,6 +789,12 @@ function addGame(){
 
 // ─── MODAL ────────────────────────────────────────────────────
 let modalGame = null;
+let modalRating = 0;
+
+function setStars(v){
+  modalRating = v;
+  document.querySelectorAll('#star-row .star').forEach(s=>s.classList.toggle('on', parseInt(s.dataset.v)<=v));
+}
 
 function openModal(g){
   modalGame = g;
@@ -776,6 +836,13 @@ function openModal(g){
 
   document.getElementById('note-area').value = meta.note||'';
 
+  // Rating
+  modalRating = meta.rating||0;
+  setStars(modalRating);
+
+  // Status
+  document.getElementById('status-sel').value = meta.status||'';
+
   // Status button
   const sb = document.getElementById('modal-status-btn');
   const isPlayed = st.played.includes(g);
@@ -814,7 +881,9 @@ function saveModal(){
   const note=document.getElementById('note-area').value.trim();
   const selEmoji=document.querySelector('#emoji-grid .sel-emoji');
   const emoji=selEmoji?selEmoji.dataset.em:'';
-  st.meta[modalGame]={...st.meta[modalGame]||{},tags,note,emoji};
+  const rating = modalRating;
+  const status=document.getElementById('status-sel').value;
+  st.meta[modalGame]={...st.meta[modalGame]||{},tags,note,emoji,rating,status};
   save(); renderAll();
   document.getElementById('modal').style.display='none';
   toast('Guardado','✓');
@@ -824,6 +893,20 @@ document.getElementById('modal-cancel').onclick=()=>document.getElementById('mod
 document.getElementById('modal-save').onclick=saveModal;
 document.getElementById('modal').onclick=e=>{if(e.target===document.getElementById('modal')) document.getElementById('modal').style.display='none';};
 
+// Star rating interaction
+document.getElementById('star-row').addEventListener('mouseover', e=>{
+  if(!e.target.dataset.v) return;
+  document.querySelectorAll('#star-row .star').forEach(s=>s.classList.toggle('on', parseInt(s.dataset.v)<=parseInt(e.target.dataset.v)));
+});
+document.getElementById('star-row').addEventListener('mouseleave', ()=>{
+  setStars(modalRating);
+});
+document.getElementById('star-row').addEventListener('click', e=>{
+  if(!e.target.dataset.v) return;
+  const v = parseInt(e.target.dataset.v);
+  setStars(modalRating===v ? 0 : v);
+});
+
 // ─── HELPERS ─────────────────────────────────────────────────
 function tagHTML(g){
   const meta=st.meta[g]; if(!meta||!meta.tags||!meta.tags.length) return '';
@@ -831,11 +914,10 @@ function tagHTML(g){
 }
 
 function makeGCard(g, opts={}){
-  const meta=st.meta[g];
+  const meta=st.meta[g]||{};
   const div=document.createElement('div');
   div.className='gcard'+(opts.played?' played':'');
 
-  // Drag-and-drop image upload
   div.addEventListener('dragover', e=>{e.preventDefault(); div.classList.add('drag-over');});
   div.addEventListener('dragleave', ()=>div.classList.remove('drag-over'));
   div.addEventListener('drop', e=>{
@@ -844,22 +926,40 @@ function makeGCard(g, opts={}){
     if(f) handleImageUpload(f, g, renderAll);
   });
 
-  const noteDot=meta&&meta.note?'<div class="gcard-note"></div>':'';
+  const noteDot=meta.note?'<div class="gcard-note"></div>':'';
   const playedBadge=opts.played?'<div class="gcard-played-badge">✓ Jugado</div>':'';
 
-  // Build cover element
+  // Rating stars (up to 5 shown as filled/empty)
+  let ratingHTML='';
+  if(meta.rating){
+    const stars=Math.round(meta.rating/2);
+    ratingHTML=`<span class="gcard-rating">${'★'.repeat(stars)}${'☆'.repeat(5-stars)} ${meta.rating}/10</span>`;
+  }
+
+  // Plays count
+  const playsHTML=meta.plays?`<span class="gcard-plays">${meta.plays}▶</span>`:'';
+
+  // Status badge
+  let statusHTML='';
+  if(meta.status==='unplayed') statusHTML='<div class="gcard-status-badge status-unplayed">Sin estrenar</div>';
+  else if(meta.status==='mastered') statusHTML='<div class="gcard-status-badge status-mastered">Dominado</div>';
+
+  // Last played
+  const lastHTML=meta.lastPlayed?`<div class="gcard-lastplayed">Última: ${meta.lastPlayed}</div>`:'';
+
   const coverContainer = document.createElement('div');
   coverContainer.style.cssText='width:100%;aspect-ratio:1/1;overflow:hidden;position:relative;';
   const coverEl = makeCoverEl(g, 200, 200);
-  if(coverEl.tagName==='CANVAS'){
-    coverEl.style.cssText='width:100%;height:100%;display:block;';
-  } else {
-    coverEl.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-  }
+  coverEl.style.cssText=coverEl.tagName==='CANVAS'?'width:100%;height:100%;display:block;':'width:100%;height:100%;object-fit:cover;display:block;';
   coverContainer.appendChild(coverEl);
 
   div.appendChild(coverContainer);
-  div.insertAdjacentHTML('beforeend', `${playedBadge}${noteDot}<div class="gcard-body"><div class="gcard-name">${g}</div><div class="gcard-tags">${tagHTML(g)}</div></div>`);
+  div.insertAdjacentHTML('beforeend',
+    `${playedBadge}${noteDot}
+    <div class="gcard-body"><div class="gcard-name">${g}</div><div class="gcard-tags">${tagHTML(g)}</div></div>
+    ${(ratingHTML||playsHTML)?`<div class="gcard-stats">${ratingHTML}${playsHTML}</div>`:''}
+    ${statusHTML}${lastHTML}`
+  );
 
   div.onclick=()=>openModal(g);
   div.addEventListener('contextmenu',e=>{e.preventDefault(); showCtx(g,opts,e.clientX,e.clientY);});
