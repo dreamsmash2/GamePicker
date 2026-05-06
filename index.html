@@ -282,11 +282,14 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
   <div id="tab-collection" style="display:none;">
     <div class="info-banner">
       <span class="icon">🖼️</span>
-      <span>Haz clic en cualquier portada para editar el juego. Para añadir la imagen de la caja, haz clic en la portada dentro del panel de edición y selecciona una foto desde tu dispositivo. Se guarda automáticamente.</span>
+      <span>Haz clic en cualquier portada para editar el juego. Para añadir la imagen de la caja, haz clic en la portada dentro del panel de edición y selecciona una foto desde tu dispositivo.</span>
     </div>
     <div class="add-row">
       <input type="text" id="add-in" placeholder="Añadir juego a la colección..." autocomplete="off"/>
       <button class="btn primary" id="btn-add">+ Añadir</button>
+    </div>
+    <div class="filter-row" id="col-filter-row">
+      <span class="filter-lbl">Filtrar</span>
     </div>
     <div class="sec">Disponibles <span class="badge badge-gold" id="b-av">0</span></div>
     <div class="game-grid" id="avail-grid"></div>
@@ -448,6 +451,8 @@ const TAGS = [
   {id:'coop',l:'Cooperativo',bg:'#081a10',tc:'#5DCAA5',bc:'#0F6E56'},
   {id:'comp',l:'Competitivo',bg:'#220e00',tc:'#F0997B',bc:'#993C1D'},
   {id:'camp',l:'Campaña',bg:'#221400',tc:'#FAC775',bc:'#854F0B'},
+  {id:'campactiva',l:'Campaña en curso',bg:'#2a0a1a',tc:'#F4A7C3',bc:'#8B2252'},
+  {id:'wargame',l:'Wargame',bg:'#0e1a08',tc:'#B5D97A',bc:'#4A7A10'},
   {id:'euro',l:'Euro',bg:'#0c1a04',tc:'#97C459',bc:'#3B6D11'},
   {id:'thema',l:'Temático',bg:'#220a0a',tc:'#F09595',bc:'#791F1F'},
   {id:'heavy',l:'Heavy',bg:'#181816',tc:'#B4B2A9',bc:'#5F5E5A'},
@@ -584,54 +589,94 @@ function handleImageUpload(file, name, onDone){
 
 // ─── ACTIONS ─────────────────────────────────────────────────
 let activeFilters = new Set();
+let activeColFilters = new Set();
 
 function buildFilterRow(){
-  const row = document.getElementById('filter-row');
+  _buildFilterBar('filter-row', activeFilters, (id, active)=>{
+    if(active) activeFilters.add(id); else activeFilters.delete(id);
+    updateFilterInfo();
+  });
+  _buildFilterBar('col-filter-row', activeColFilters, (id, active)=>{
+    if(active) activeColFilters.add(id); else activeColFilters.delete(id);
+    renderAll();
+  });
+}
+
+function _buildFilterBar(rowId, activeSet, onChange){
+  const row = document.getElementById(rowId);
+  if(!row) return;
   row.innerHTML = '<span class="filter-lbl">Filtrar</span>';
   TAGS.forEach(t=>{
     const btn = document.createElement('button');
-    btn.className = 'ftag' + (activeFilters.has(t.id)?' active':'');
+    btn.className = 'ftag' + (activeSet.has(t.id)?' active':'');
     btn.textContent = t.l;
     btn.dataset.id = t.id;
-    if(activeFilters.has(t.id)){
-      btn.style.background = t.bg;
-      btn.style.color = t.tc;
-      btn.style.borderColor = t.bc;
+    if(activeSet.has(t.id)){
+      btn.style.background=t.bg; btn.style.color=t.tc; btn.style.borderColor=t.bc;
     }
     btn.onclick = ()=>{
-      if(activeFilters.has(t.id)){
-        activeFilters.delete(t.id);
+      const isActive = activeSet.has(t.id);
+      if(isActive){
+        activeSet.delete(t.id);
         btn.classList.remove('active');
         btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
       } else {
-        activeFilters.add(t.id);
+        activeSet.add(t.id);
         btn.classList.add('active');
         btn.style.background=t.bg; btn.style.color=t.tc; btn.style.borderColor=t.bc;
       }
-      updateFilterInfo();
+      onChange(t.id, !isActive);
     };
     row.appendChild(btn);
   });
 }
 
 function getFilteredPool(){
-  if(activeFilters.size===0) return [...st.available];
-  return st.available.filter(g=>{
+  // Always exclude games tagged as campaign (camp) or active campaign (campactiva)
+  const EXCLUDED_TAGS = ['camp','campactiva'];
+  let pool = st.available.filter(g=>{
+    const meta = st.meta[g];
+    if(meta && meta.tags && meta.tags.some(t => EXCLUDED_TAGS.includes(t))) return false;
+    return true;
+  });
+  if(activeFilters.size===0) return pool;
+  return pool.filter(g=>{
     const meta = st.meta[g];
     if(!meta||!meta.tags||!meta.tags.length) return false;
     return [...activeFilters].some(f => meta.tags.includes(f));
   });
 }
 
+function getCampaignGames(){
+  const EXCLUDED_TAGS = ['camp','campactiva'];
+  return st.available.filter(g=>{
+    const meta = st.meta[g];
+    return meta && meta.tags && meta.tags.some(t => EXCLUDED_TAGS.includes(t));
+  });
+}
+
 function updateFilterInfo(){
   const info = document.getElementById('filter-info');
-  if(activeFilters.size===0){ info.style.display='none'; return; }
   const pool = getFilteredPool();
-  const tagNames = [...activeFilters].map(id=>TAGS.find(t=>t.id===id)?.l).join(', ');
-  info.style.display='';
-  info.textContent = pool.length > 0
-    ? `${pool.length} juego${pool.length!==1?'s':''} disponible${pool.length!==1?'s':''} con etiqueta: ${tagNames}`
-    : `⚠ Ningún juego disponible tiene las etiquetas: ${tagNames}`;
+  const campGames = getCampaignGames();
+  const lines = [];
+  if(campGames.length>0){
+    lines.push(`🎲 ${campGames.length} juego${campGames.length!==1?'s':''} de campaña excluido${campGames.length!==1?'s':''} del sorteo`);
+  }
+  if(activeFilters.size>0){
+    const tagNames = [...activeFilters].map(id=>TAGS.find(t=>t.id===id)?.l).join(', ');
+    if(pool.length>0){
+      lines.push(`${pool.length} juego${pool.length!==1?'s':''} disponible${pool.length!==1?'s':''} con: ${tagNames}`);
+    } else {
+      lines.push(`⚠ Ningún juego disponible con: ${tagNames}`);
+    }
+  }
+  if(lines.length>0){
+    info.style.display='';
+    info.innerHTML = lines.join('<br>');
+  } else {
+    info.style.display='none';
+  }
 }
 
 function pickGames(){
@@ -880,11 +925,23 @@ function renderAll(){
 
   // COLLECTION
   const ag=document.getElementById('avail-grid'); ag.innerHTML='';
-  [...st.available].sort((a,b)=>a.localeCompare(b,'es')).forEach(g=>ag.appendChild(makeGCard(g)));
-  const playedOnly=st.played.filter(g=>!st.picked.includes(g));
+  let availToShow = [...st.available].sort((a,b)=>a.localeCompare(b,'es'));
+  let playedOnly = st.played.filter(g=>!st.picked.includes(g));
+  let playedToShow = [...playedOnly].sort((a,b)=>a.localeCompare(b,'es'));
+  if(activeColFilters.size>0){
+    availToShow = availToShow.filter(g=>{
+      const meta=st.meta[g];
+      return meta&&meta.tags&&meta.tags.some(t=>activeColFilters.has(t));
+    });
+    playedToShow = playedToShow.filter(g=>{
+      const meta=st.meta[g];
+      return meta&&meta.tags&&meta.tags.some(t=>activeColFilters.has(t));
+    });
+  }
+  availToShow.forEach(g=>ag.appendChild(makeGCard(g)));
   document.getElementById('played-sec').style.display=playedOnly.length?'':'none';
   const pg=document.getElementById('played-grid'); pg.innerHTML='';
-  [...playedOnly].sort((a,b)=>a.localeCompare(b,'es')).forEach(g=>pg.appendChild(makeGCard(g,{played:true})));
+  playedToShow.forEach(g=>pg.appendChild(makeGCard(g,{played:true})));
 
   // HISTORY
   const hl=document.getElementById('hist-list'); hl.innerHTML='';
@@ -1113,6 +1170,7 @@ loadImgs();
 load();
 loadGD();
 buildFilterRow();
+updateFilterInfo();
 renderAll();
 
 function loadGD(){
