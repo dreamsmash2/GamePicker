@@ -167,15 +167,39 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 .status-learning{background:#041228;color:#85B7EB;border-color:#185FA5;}
 .status-mastered{background:#061509;color:#81C784;border-color:#2E7D32;}
 
-/* HISTORY */
+/* HISTORY IMPROVEMENTS */
 .hist-entry{background:var(--ink3);border-radius:12px;border:1px solid var(--border);padding:12px 14px;margin-bottom:9px;animation:fadeUp .3s ease both;}
-.hist-date{font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:var(--gold-d);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;}
+.hist-date{font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:var(--gold-d);letter-spacing:.1em;text-transform:uppercase;}
+.hist-edit-btn{background:none;border:1px solid var(--border2);border-radius:6px;padding:2px 8px;font-size:9px;cursor:pointer;color:var(--text3);font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.05em;transition:all .12s;white-space:nowrap;}
+.hist-edit-btn:hover{color:var(--gold);border-color:var(--gold-d);}
 .hist-games{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
 .hist-game{display:flex;align-items:center;gap:6px;background:#1a1000;border:1px solid var(--gold-d);border-radius:7px;padding:4px 10px 4px 5px;font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;color:var(--gold-l);}
+.hist-game-plays{font-size:8px;color:var(--gold-d);margin-left:2px;}
 .hist-cover{width:24px;height:24px;border-radius:4px;overflow:hidden;flex-shrink:0;}
 .hist-cover img{width:100%;height:100%;object-fit:cover;}
 .hist-cover canvas{width:24px !important;height:24px !important;}
+.hist-note{font-size:13px;color:var(--text3);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-family:'Crimson Pro',serif;line-height:1.5;}
+.hist-note::before{content:'📝 ';}
 .hist-empty{font-size:15px;color:var(--text4);font-style:italic;padding:2rem 0;text-align:center;}
+
+/* SESSION NOTES MODAL */
+.session-modal{background:linear-gradient(160deg,var(--ink3),var(--ink2));border:1px solid var(--border2);border-radius:18px 18px 0 0;padding:1.5rem 1.25rem;width:100%;max-width:480px;max-height:70vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.6);}
+@media(min-width:500px){.session-modal{border-radius:18px;}}
+.session-modal h3{font-family:'Cinzel',serif;font-size:15px;font-weight:900;color:var(--gold-l);margin-bottom:4px;}
+.session-modal .msub{font-size:12px;color:var(--text3);margin-bottom:1rem;font-style:italic;}
+.session-games-preview{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
+.session-game-chip{display:flex;align-items:center;gap:5px;background:#1a1000;border:1px solid var(--gold-d);border-radius:6px;padding:3px 9px 3px 4px;font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:var(--gold-l);}
+.session-chip-cover{width:20px;height:20px;border-radius:3px;overflow:hidden;flex-shrink:0;}
+.session-chip-cover img,.session-chip-cover canvas{width:100%;height:100%;object-fit:cover;display:block;}
+.session-game-note-block{margin-bottom:1rem;}
+.session-game-note-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.session-game-note-header .session-chip-cover{width:32px;height:32px;border-radius:6px;overflow:hidden;flex-shrink:0;border:1px solid var(--gold-d);}
+.session-game-note-header .session-chip-cover img,.session-game-note-header .session-chip-cover canvas{width:32px;height:32px;object-fit:cover;display:block;}
+.session-game-note-name{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--gold-l);}
+.session-game-note-area{font-family:'Crimson Pro',serif;font-size:14px;width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--ink3);color:var(--text);resize:none;outline:none;min-height:56px;}
+.session-game-note-area:focus{border-color:var(--gold-d);}
+.session-game-note-area::placeholder{color:var(--text4);font-style:italic;}
 
 /* SETTINGS */
 .sblock{background:var(--ink3);border-radius:12px;border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem;}
@@ -214,6 +238,44 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 
 /* Drag over */
 .drag-over{border-color:var(--gold) !important;box-shadow:0 0 20px var(--gold-glow) !important;}
+
+/* MULTI-SELECT */
+.gcard.selected{border-color:var(--gold) !important;box-shadow:0 0 16px var(--gold-glow) !important;transform:translateY(-2px);}
+.gcard.selected::after{content:'✓';position:absolute;top:5px;left:6px;font-family:'Cinzel',serif;font-size:12px;font-weight:900;color:var(--gold);background:rgba(0,0,0,.7);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;line-height:20px;text-align:center;}
+.gcard.vetoed{opacity:.5;filter:grayscale(.5);}
+.gcard.vetoed::before{content:'⏸';position:absolute;top:5px;left:6px;font-size:14px;z-index:2;}
+.multisel-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;background:linear-gradient(135deg,#2a1c00,#1a1200);border:1px solid var(--gold-d);border-radius:10px;padding:10px 14px;margin-bottom:1rem;animation:fadeUp .2s ease;}
+.multisel-bar.show{display:flex;}
+.multisel-info{font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:var(--gold-l);letter-spacing:.06em;flex:1;}
+
+/* VETO BADGE */
+.gcard-veto-badge{position:absolute;top:0;left:0;right:0;padding:4px 6px;background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,transparent 100%);font-family:'Cinzel',serif;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#F4A7C3;}
+
+/* SURPRISE MODE */
+.surprise-card{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#251800,#181000);border:1px solid var(--gold-d);border-radius:var(--r);padding:12px 18px;animation:rollIn .45s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 16px var(--gold-glow);cursor:pointer;min-width:180px;}
+.surprise-front{font-family:'Cinzel',serif;font-size:28px;text-align:center;}
+.surprise-front small{display:block;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold-d);margin-top:4px;text-transform:uppercase;}
+.surprise-back{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold-l);text-align:center;line-height:1.4;}
+
+/* WEIGHT INFO */
+.weight-info{font-size:11px;color:var(--text3);font-style:italic;margin-top:4px;}
+
+/* STATS */
+.stats-kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:.5rem;}
+@media(min-width:400px){.stats-kpi-grid{grid-template-columns:repeat(4,1fr);}}
+.kpi{background:var(--ink3);border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center;}
+.kpi-val{font-family:'Cinzel',serif;font-size:26px;font-weight:900;color:var(--gold);line-height:1;}
+.kpi-lbl{font-family:'Cinzel',serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text4);margin-top:4px;}
+.stats-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.stats-bar-label{font-size:12px;color:var(--text2);min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stats-bar-track{flex:2;height:8px;background:var(--ink4);border-radius:4px;overflow:hidden;}
+.stats-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold-d),var(--gold));transition:width .6s cubic-bezier(.34,1.1,.64,1);}
+.stats-bar-val{font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:var(--gold);min-width:24px;text-align:right;}
+.stats-chart-wrap{background:var(--ink3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:.5rem;position:relative;height:160px;}
+.stats-chart-wrap canvas{position:absolute;inset:12px;}
+.stats-tag-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.stats-tag-pill{font-family:'Cinzel',serif;font-size:8px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid;white-space:nowrap;flex-shrink:0;min-width:80px;text-align:center;}
+.stats-empty{font-size:13px;color:var(--text4);font-style:italic;padding:.5rem 0;font-family:'Crimson Pro',serif;}
 .filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;align-items:center;}
 .filter-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text4);margin-right:2px;}
 .ftag{font-family:'Cinzel',serif;font-size:9px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);cursor:pointer;background:var(--ink3);color:var(--text3);text-transform:uppercase;letter-spacing:.05em;transition:all .15s;}
@@ -265,16 +327,17 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 </header>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="picker">🎲 Elegir</button>
-  <button class="tab" data-tab="collection">📦 Colección</button>
+  <button class="tab active" data-tab="collection">📦 Colección</button>
+  <button class="tab" data-tab="picker">🎲 Elegir</button>
   <button class="tab" data-tab="history">📜 Historial</button>
+  <button class="tab" data-tab="stats">📊 Stats</button>
   <button class="tab" data-tab="settings">⚙️ Datos</button>
 </nav>
 
 <div class="main">
 
   <!-- PICKER -->
-  <div id="tab-picker">
+  <div id="tab-picker" style="display:none;">
     <div class="controls" style="margin-top:.5rem;">
       <span class="lbl">Juegos</span>
       <select class="sel" id="np">
@@ -285,6 +348,10 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <button class="btn primary" id="btn-pick">🎲 Tirar los dados</button>
       <button class="btn sm confirm" id="btn-confirm" style="display:none;">✓ Confirmar</button>
       <button class="btn sm ghost" id="btn-cancel" style="display:none;">✕ Cancelar</button>
+    </div>
+    <div class="controls" style="margin-top:-.5rem;margin-bottom:.2rem;">
+      <button class="btn sm ghost" id="btn-surprise" title="Oculta los juegos elegidos hasta que pulses para revelarlos">🎭 Modo sorpresa</button>
+      <button class="btn sm ghost" id="btn-weight" title="Los juegos que llevan más tiempo sin jugarse tienen más probabilidad de salir">⚖️ Peso por tiempo</button>
     </div>
     <div class="filter-row" id="filter-row">
       <span class="filter-lbl">Filtrar</span>
@@ -300,10 +367,16 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
   </div>
 
   <!-- COLLECTION -->
-  <div id="tab-collection" style="display:none;">
+  <div id="tab-collection">
     <div class="info-banner">
       <span class="icon">🖼️</span>
-      <span>Haz clic en cualquier portada para editar el juego. Para añadir la imagen de la caja, haz clic en la portada dentro del panel de edición y selecciona una foto desde tu dispositivo.</span>
+      <span>Clic para editar. <strong style="color:var(--gold-l);">Ctrl+Clic</strong> para seleccionar varios juegos y moverlos a jugados de una vez.</span>
+    </div>
+    <div class="multisel-bar" id="multisel-bar">
+      <span class="multisel-info" id="multisel-info"></span>
+      <button class="btn sm confirm" id="multisel-played">✓ Mover a jugados</button>
+      <button class="btn sm" id="multisel-veto" style="color:#F4A7C3;border-color:#8B2252;">⏸ Vetar este finde</button>
+      <button class="btn sm ghost" id="multisel-cancel">✕ Cancelar</button>
     </div>
     <div class="add-row">
       <input type="text" id="add-in" placeholder="Añadir juego a la colección..." autocomplete="off"/>
@@ -325,6 +398,20 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
   <div id="tab-history" style="display:none;">
     <div class="sec" style="margin-top:.5rem;">Sesiones de juego</div>
     <div id="hist-list"></div>
+  </div>
+
+  <!-- STATS -->
+  <div id="tab-stats" style="display:none;">
+    <div class="sec" style="margin-top:.5rem;">Resumen</div>
+    <div class="stats-kpi-grid" id="stats-kpi"></div>
+    <div class="sec">Juegos más jugados</div>
+    <div id="stats-top-games"></div>
+    <div class="sec">Partidas por mes</div>
+    <div class="stats-chart-wrap"><canvas id="stats-chart-month"></canvas></div>
+    <div class="sec">Distribución por etiquetas</div>
+    <div id="stats-tags-chart"></div>
+    <div class="sec">Estado de la colección</div>
+    <div id="stats-status-chart"></div>
   </div>
 
   <!-- SETTINGS -->
@@ -371,6 +458,19 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
   </div>
 
 </div><!-- /main -->
+
+<!-- SESSION NOTES MODAL -->
+<div class="overlay" id="session-modal-overlay" style="display:none;">
+  <div class="session-modal">
+    <h3>✦ Sesión completada</h3>
+    <p class="msub">Añade notas individuales para cada juego si quieres.</p>
+    <div id="session-games-notes"></div>
+    <div class="modal-actions">
+      <button class="btn sm ghost" id="session-skip">Omitir</button>
+      <button class="btn sm primary" id="session-save">Guardar sesión</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL -->
 <div class="overlay" id="modal" style="display:none;">
@@ -718,6 +818,11 @@ function updateFilterInfo(){
       lines.push(`⚠ Ningún juego disponible con: ${tagNames}`);
     }
   }
+  const vetoedGames = st.available.filter(g=>st.meta[g]?.vetoed);
+  if(vetoedGames.length>0){
+    lines.push(`⏸ ${vetoedGames.length} juego${vetoedGames.length!==1?'s':''} vetado${vetoedGames.length!==1?'s':''} este finde`);
+  }
+  if(weightMode) lines.push('⚖️ Peso por tiempo activado — los menos jugados tienen más probabilidad');
   if(lines.length>0){
     info.style.display='';
     info.innerHTML = lines.join('<br>');
@@ -726,9 +831,65 @@ function updateFilterInfo(){
   }
 }
 
+// ─── MODES ───────────────────────────────────────────────────
+let surpriseMode = false;
+let weightMode = false;
+let surpriseRevealed = new Set();
+
+document.getElementById('btn-surprise').addEventListener('click', ()=>{
+  surpriseMode = !surpriseMode;
+  const btn = document.getElementById('btn-surprise');
+  btn.style.color = surpriseMode ? 'var(--gold-l)' : '';
+  btn.style.borderColor = surpriseMode ? 'var(--gold-d)' : '';
+  btn.style.background = surpriseMode ? 'linear-gradient(135deg,#321c00,#533000)' : '';
+  toast(surpriseMode ? 'Modo sorpresa activado' : 'Modo sorpresa desactivado', '🎭');
+});
+
+document.getElementById('btn-weight').addEventListener('click', ()=>{
+  weightMode = !weightMode;
+  const btn = document.getElementById('btn-weight');
+  btn.style.color = weightMode ? 'var(--gold-l)' : '';
+  btn.style.borderColor = weightMode ? 'var(--gold-d)' : '';
+  btn.style.background = weightMode ? 'linear-gradient(135deg,#321c00,#533000)' : '';
+  toast(weightMode ? 'Peso por tiempo activado' : 'Peso por tiempo desactivado', '⚖️');
+  updateFilterInfo();
+});
+
+function weightedShuffle(pool){
+  // Games with older lastPlayed or never played get higher weight
+  const now = Date.now();
+  const weights = pool.map(g=>{
+    const meta = st.meta[g];
+    if(!meta || !meta.lastPlayed) return 10; // Never played = max weight
+    // Parse lastPlayed date and calculate days since
+    const parts = meta.lastPlayed.split(' ');
+    const d = new Date(meta.lastPlayed);
+    const days = isNaN(d) ? 30 : Math.max(1, (now - d.getTime()) / 86400000);
+    return Math.min(10, Math.sqrt(days));
+  });
+  // Weighted random selection
+  const result = [];
+  const remaining = [...pool];
+  const remWeights = [...weights];
+  while(remaining.length > 0){
+    const total = remWeights.reduce((a,b)=>a+b, 0);
+    let r = Math.random() * total;
+    let idx = 0;
+    for(let i=0; i<remWeights.length; i++){
+      r -= remWeights[i];
+      if(r <= 0){ idx=i; break; }
+    }
+    result.push(remaining[idx]);
+    remaining.splice(idx,1);
+    remWeights.splice(idx,1);
+  }
+  return result;
+}
+
 function pickGames(){
   const n=parseInt(document.getElementById('np').value);
-  const pool = getFilteredPool();
+  // Exclude vetoed games
+  const pool = getFilteredPool().filter(g=>!st.meta[g]?.vetoed);
   if(!pool.length){
     if(activeFilters.size>0) toast('Ningún juego disponible con esos filtros','⚠');
     else toast('No hay juegos disponibles','⚠');
@@ -737,7 +898,9 @@ function pickGames(){
   const ov=document.getElementById('roll-ov'); ov.classList.add('show');
   setTimeout(()=>{
     ov.classList.remove('show');
-    st.picked=shuffle(pool).slice(0,Math.min(n,pool.length));
+    const sorted = weightMode ? weightedShuffle(pool) : shuffle(pool);
+    st.picked = sorted.slice(0, Math.min(n, pool.length));
+    surpriseRevealed.clear();
     save(); renderAll();
     document.getElementById('btn-confirm').style.display='';
     document.getElementById('btn-cancel').style.display='';
@@ -746,35 +909,123 @@ function pickGames(){
 
 function confirmPlayed(){
   if(!st.picked.length) return;
+  // Build per-game note blocks
+  const container = document.getElementById('session-games-notes');
+  container.innerHTML='';
+  st.picked.forEach(g=>{
+    const block=document.createElement('div'); block.className='session-game-note-block';
+    const hdr=document.createElement('div'); hdr.className='session-game-note-header';
+    const cw=document.createElement('div'); cw.className='session-chip-cover';
+    const ce=makeCoverEl(g,32,32);
+    ce.style.cssText='width:32px;height:32px;object-fit:cover;display:block;';
+    cw.appendChild(ce); hdr.appendChild(cw);
+    hdr.insertAdjacentHTML('beforeend',`<span class="session-game-note-name">${g}</span>`);
+    block.appendChild(hdr);
+    const ta=document.createElement('textarea');
+    ta.className='session-game-note-area'; ta.rows=2;
+    ta.placeholder=`Nota sobre ${g}...`; ta.dataset.game=g;
+    block.appendChild(ta);
+    container.appendChild(block);
+  });
+  document.getElementById('session-modal-overlay').style.display='flex';
+}
+
+function finishSession(notes){
+  document.getElementById('session-modal-overlay').style.display='none';
   const date=new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const dateShort=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'});
-  st.history.unshift({date, games:[...st.picked]});
+  // notes is either a string (legacy/edit) or object {gameName: note}
+  const entry={date, games:[...st.picked], gameNotes: typeof notes==='object' && notes!==null ? notes : {}};
+  if(typeof notes==='string' && notes) entry.note=notes;
+  st.history.unshift(entry);
   st.picked.forEach(g=>{
     const i=st.available.indexOf(g); if(i>-1) st.available.splice(i,1);
     if(!st.played.includes(g)) st.played.push(g);
-    // Update play count and last played
     if(!st.meta[g]) st.meta[g]={tags:[],note:'',emoji:'',rating:0,status:''};
     st.meta[g].plays = (st.meta[g].plays||0)+1;
     st.meta[g].lastPlayed = dateShort;
-    // Auto-update status from unplayed to learning on first play
     if(!st.meta[g].status || st.meta[g].status==='unplayed') st.meta[g].status='learning';
   });
-  st.picked=[]; save(); renderAll();
+  st.picked=[]; surpriseRevealed.clear();
+  clearVetoes(); save(); renderAll();
   document.getElementById('btn-confirm').style.display='none';
   document.getElementById('btn-cancel').style.display='none';
   toast('¡Sesión guardada!','📜');
 }
 
-function cancelPick(){ st.picked=[]; save(); renderAll(); document.getElementById('btn-confirm').style.display='none'; document.getElementById('btn-cancel').style.display='none'; }
+function collectGameNotes(){
+  const notes={};
+  document.querySelectorAll('#session-games-notes .session-game-note-area').forEach(ta=>{
+    const v=ta.value.trim(); if(v) notes[ta.dataset.game]=v;
+  });
+  return notes;
+}
+
+function clearVetoes(){
+  Object.keys(st.meta).forEach(g=>{ if(st.meta[g]) st.meta[g].vetoed=false; });
+  save();
+}
+
+function openHistoryNoteEditor(idx){
+  const s = st.history[idx];
+  if(!s) return;
+  const container = document.getElementById('session-games-notes');
+  container.innerHTML='';
+  s.games.forEach(g=>{
+    const block=document.createElement('div'); block.className='session-game-note-block';
+    const hdr=document.createElement('div'); hdr.className='session-game-note-header';
+    const cw=document.createElement('div'); cw.className='session-chip-cover';
+    const ce=makeCoverEl(g,32,32);
+    ce.style.cssText='width:32px;height:32px;object-fit:cover;display:block;';
+    cw.appendChild(ce); hdr.appendChild(cw);
+    hdr.insertAdjacentHTML('beforeend',`<span class="session-game-note-name">${g}</span>`);
+    block.appendChild(hdr);
+    const ta=document.createElement('textarea');
+    ta.className='session-game-note-area'; ta.rows=2;
+    ta.placeholder=`Nota sobre ${g}...`; ta.dataset.game=g;
+    ta.value = (s.gameNotes&&s.gameNotes[g]) || '';
+    block.appendChild(ta);
+    container.appendChild(block);
+  });
+  const saveBtn=document.getElementById('session-save');
+  const skipBtn=document.getElementById('session-skip');
+  const origSave=saveBtn.onclick; const origSkip=skipBtn.onclick;
+  saveBtn.onclick=()=>{
+    const notes=collectGameNotes();
+    st.history[idx].gameNotes=notes;
+    document.getElementById('session-modal-overlay').style.display='none';
+    saveBtn.onclick=origSave; skipBtn.onclick=origSkip; skipBtn.textContent='Omitir';
+    save(); renderAll(); toast('Notas actualizadas','✎');
+  };
+  skipBtn.textContent='Cancelar';
+  skipBtn.onclick=()=>{
+    document.getElementById('session-modal-overlay').style.display='none';
+    saveBtn.onclick=origSave; skipBtn.onclick=origSkip; skipBtn.textContent='Omitir';
+  };
+  document.getElementById('session-modal-overlay').style.display='flex';
+}
+
+function cancelPick(){ st.picked=[]; surpriseRevealed.clear(); save(); renderAll(); document.getElementById('btn-confirm').style.display='none'; document.getElementById('btn-cancel').style.display='none'; }
 function unpick(g){ const i=st.picked.indexOf(g); if(i>-1) st.picked.splice(i,1); save(); renderAll(); }
 function restoreGame(g){ ['played','picked'].forEach(l=>{const i=st[l].indexOf(g); if(i>-1) st[l].splice(i,1);}); if(!st.available.includes(g)) st.available.push(g); save(); renderAll(); toast(`${g} disponible de nuevo`,'↺'); }
 
 function markAsPlayed(g){
-  // Remove from available and picked if present
   ['available','picked'].forEach(l=>{const i=st[l].indexOf(g); if(i>-1) st[l].splice(i,1);});
   if(!st.played.includes(g)) st.played.push(g);
+  const dateShort=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'});
+  if(!st.meta[g]) st.meta[g]={tags:[],note:'',emoji:'',rating:0,status:''};
+  st.meta[g].plays = (st.meta[g].plays||0)+1;
+  st.meta[g].lastPlayed = dateShort;
+  if(!st.meta[g].status || st.meta[g].status==='unplayed') st.meta[g].status='learning';
   save(); renderAll(); toast(`${g} marcado como jugado`,'✓');
 }
+
+function vetoGame(g){
+  if(!st.meta[g]) st.meta[g]={};
+  st.meta[g].vetoed = true;
+  save(); renderAll(); toast(`${g} vetado este finde`,'⏸');
+}
+
 function removeGame(g){ if(!confirm(`¿Eliminar "${g}"?`)) return; ['available','played','picked'].forEach(l=>{const i=st[l].indexOf(g); if(i>-1) st[l].splice(i,1);}); delete st.meta[g]; save(); renderAll(); toast('Eliminado','✕'); }
 
 function addGame(){
@@ -786,6 +1037,66 @@ function addGame(){
   }
   st.available.push(n); inp.value=''; save(); renderAll(); toast(`${n} añadido`,'✦');
 }
+
+// ─── MULTI-SELECT ─────────────────────────────────────────────
+let selectedGames = new Set();
+
+function toggleSelect(g){
+  if(selectedGames.has(g)) selectedGames.delete(g);
+  else selectedGames.add(g);
+  updateMultiselBar();
+  renderAll();
+}
+
+function updateMultiselBar(){
+  const bar = document.getElementById('multisel-bar');
+  const info = document.getElementById('multisel-info');
+  if(selectedGames.size>0){
+    bar.classList.add('show');
+    info.textContent = `${selectedGames.size} juego${selectedGames.size!==1?'s':''} seleccionado${selectedGames.size!==1?'s':''}`;
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function clearSelection(){ selectedGames.clear(); updateMultiselBar(); renderAll(); }
+
+function multiselToPlayed(){
+  const dateShort=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'});
+  selectedGames.forEach(g=>{
+    ['available','picked'].forEach(l=>{const i=st[l].indexOf(g); if(i>-1) st[l].splice(i,1);});
+    if(!st.played.includes(g)) st.played.push(g);
+    if(!st.meta[g]) st.meta[g]={tags:[],note:'',emoji:'',rating:0,status:''};
+    st.meta[g].plays = (st.meta[g].plays||0)+1;
+    st.meta[g].lastPlayed = dateShort;
+    if(!st.meta[g].status || st.meta[g].status==='unplayed') st.meta[g].status='learning';
+  });
+  const n = selectedGames.size;
+  clearSelection(); save(); renderAll();
+  toast(`${n} juego${n!==1?'s':''} movido${n!==1?'s':''} a jugados`,'✓');
+}
+
+function multiselVeto(){
+  selectedGames.forEach(g=>{
+    if(!st.meta[g]) st.meta[g]={};
+    st.meta[g].vetoed = true;
+  });
+  const n = selectedGames.size;
+  clearSelection(); save(); renderAll();
+  toast(`${n} juego${n!==1?'s':''} vetado${n!==1?'s':''} este finde`,'⏸');
+}
+
+// Keyboard: Enter to confirm multi-select, Escape to cancel
+document.addEventListener('keydown', e=>{
+  if(selectedGames.size>0){
+    if(e.key==='Enter'){ multiselToPlayed(); }
+    if(e.key==='Escape'){ clearSelection(); }
+  }
+});
+
+document.getElementById('multisel-played').onclick = multiselToPlayed;
+document.getElementById('multisel-veto').onclick = multiselVeto;
+document.getElementById('multisel-cancel').onclick = clearSelection;
 
 // ─── MODAL ────────────────────────────────────────────────────
 let modalGame = null;
@@ -916,7 +1227,9 @@ function tagHTML(g){
 function makeGCard(g, opts={}){
   const meta=st.meta[g]||{};
   const div=document.createElement('div');
-  div.className='gcard'+(opts.played?' played':'');
+  const isSelected = selectedGames.has(g);
+  const isVetoed = meta.vetoed;
+  div.className='gcard'+(opts.played?' played':'')+(isSelected?' selected':'')+(isVetoed?' vetoed':'');
 
   div.addEventListener('dragover', e=>{e.preventDefault(); div.classList.add('drag-over');});
   div.addEventListener('dragleave', ()=>div.classList.remove('drag-over'));
@@ -928,23 +1241,17 @@ function makeGCard(g, opts={}){
 
   const noteDot=meta.note?'<div class="gcard-note"></div>':'';
   const playedBadge=opts.played?'<div class="gcard-played-badge">✓ Jugado</div>':'';
+  const vetoBadge=isVetoed?'<div class="gcard-veto-badge">⏸ Vetado este finde</div>':'';
 
-  // Rating stars (up to 5 shown as filled/empty)
   let ratingHTML='';
   if(meta.rating){
     const stars=Math.round(meta.rating/2);
     ratingHTML=`<span class="gcard-rating">${'★'.repeat(stars)}${'☆'.repeat(5-stars)} ${meta.rating}/10</span>`;
   }
-
-  // Plays count
   const playsHTML=meta.plays?`<span class="gcard-plays">${meta.plays}▶</span>`:'';
-
-  // Status badge
   let statusHTML='';
   if(meta.status==='unplayed') statusHTML='<div class="gcard-status-badge status-unplayed">Sin estrenar</div>';
   else if(meta.status==='mastered') statusHTML='<div class="gcard-status-badge status-mastered">Dominado</div>';
-
-  // Last played
   const lastHTML=meta.lastPlayed?`<div class="gcard-lastplayed">Última: ${meta.lastPlayed}</div>`:'';
 
   const coverContainer = document.createElement('div');
@@ -955,13 +1262,17 @@ function makeGCard(g, opts={}){
 
   div.appendChild(coverContainer);
   div.insertAdjacentHTML('beforeend',
-    `${playedBadge}${noteDot}
+    `${playedBadge}${vetoBadge}${noteDot}
     <div class="gcard-body"><div class="gcard-name">${g}</div><div class="gcard-tags">${tagHTML(g)}</div></div>
     ${(ratingHTML||playsHTML)?`<div class="gcard-stats">${ratingHTML}${playsHTML}</div>`:''}
     ${statusHTML}${lastHTML}`
   );
 
-  div.onclick=()=>openModal(g);
+  div.onclick=(e)=>{
+    if(e.ctrlKey || e.metaKey){ e.preventDefault(); toggleSelect(g); return; }
+    if(selectedGames.size>0){ toggleSelect(g); return; }
+    openModal(g);
+  };
   div.addEventListener('contextmenu',e=>{e.preventDefault(); showCtx(g,opts,e.clientX,e.clientY);});
   let lp; div.addEventListener('touchstart',()=>{lp=setTimeout(()=>showCtx(g,opts,0,0),600);},{passive:true}); div.addEventListener('touchend',()=>clearTimeout(lp)); div.addEventListener('touchmove',()=>clearTimeout(lp));
   return div;
@@ -971,11 +1282,17 @@ function showCtx(g,opts,x,y){
   document.querySelectorAll('.ctxmenu').forEach(p=>p.remove());
   const pop=document.createElement('div'); pop.className='ctxmenu';
   if(x===0&&y===0){pop.style.cssText+='bottom:2rem;left:50%;transform:translateX(-50%);';}
-  else{pop.style.top=Math.min(y+4,window.innerHeight-120)+'px'; pop.style.left=Math.max(4,Math.min(x,window.innerWidth-160))+'px';}
+  else{pop.style.top=Math.min(y+4,window.innerHeight-160)+'px'; pop.style.left=Math.max(4,Math.min(x,window.innerWidth-160))+'px';}
   const acts=[];
   if(opts.played) acts.push({l:'↺ Restaurar',c:'restore',f:()=>restoreGame(g)});
+  if(!opts.played){
+    const isVetoed = st.meta[g]?.vetoed;
+    if(isVetoed) acts.push({l:'▶ Quitar veto',c:'restore',f:()=>{ if(st.meta[g]) st.meta[g].vetoed=false; save(); renderAll(); toast('Veto eliminado','▶'); }});
+    else acts.push({l:'⏸ Vetar este finde',c:'',f:()=>vetoGame(g), style:'color:#F4A7C3;border-color:#8B2252;'});
+    acts.push({l:'✓ Marcar jugado',c:'restore',f:()=>markAsPlayed(g)});
+  }
   acts.push({l:'✕ Eliminar',c:'del',f:()=>removeGame(g)});
-  acts.forEach(a=>{const b=document.createElement('button'); b.className='ibt '+a.c; b.style.cssText='width:100%;text-align:left;padding:6px 12px;'; b.textContent=a.l; b.onclick=()=>{pop.remove();a.f();}; pop.appendChild(b);});
+  acts.forEach(a=>{const b=document.createElement('button'); b.className='ibt '+a.c; b.style.cssText='width:100%;text-align:left;padding:6px 12px;'+(a.style||''); b.textContent=a.l; b.onclick=()=>{pop.remove();a.f();}; pop.appendChild(b);});
   document.body.appendChild(pop);
   setTimeout(()=>document.addEventListener('click',()=>pop.remove(),{once:true}),10);
 }
@@ -1005,19 +1322,27 @@ function renderAll(){
   document.getElementById('b-pl').textContent=st.played.length;
   document.getElementById('b-pl2').textContent=st.played.filter(g=>!st.picked.includes(g)).length;
 
-  // PICKER
+  // PICKER - picked cards
   const pe=document.getElementById('pe'), pc=document.getElementById('pc');
   pe.style.display=st.picked.length?'none':'';
   pc.innerHTML='';
   st.picked.forEach((g,i)=>{
-    const d=document.createElement('div'); d.className='pcard'; d.style.animationDelay=(i*.14)+'s';
-    const cw=document.createElement('div'); cw.style.cssText='width:46px;height:46px;border-radius:7px;overflow:hidden;border:1px solid var(--gold-d);flex-shrink:0;';
-    const ce=makeCoverEl(g,46,46);
-    if(ce.tagName==='CANVAS') ce.style.cssText='width:46px;height:46px;display:block;';
-    else ce.style.cssText='width:46px;height:46px;object-fit:cover;display:block;';
-    cw.appendChild(ce); d.appendChild(cw);
-    d.insertAdjacentHTML('beforeend',`<span class="pcard-name">${g}</span><button class="pcard-rm" onclick="unpick(${JSON.stringify(g)})">✕</button>`);
-    pc.appendChild(d);
+    if(surpriseMode && !surpriseRevealed.has(g)){
+      // Show mystery card
+      const d=document.createElement('div');
+      d.className='surprise-card'; d.style.animationDelay=(i*.14)+'s';
+      d.innerHTML=`<div class="surprise-front">🎁<small>Toca para revelar</small></div>`;
+      d.onclick=()=>{ surpriseRevealed.add(g); renderAll(); };
+      pc.appendChild(d);
+    } else {
+      const d=document.createElement('div'); d.className='pcard'; d.style.animationDelay=(i*.14)+'s';
+      const cw=document.createElement('div'); cw.style.cssText='width:46px;height:46px;border-radius:7px;overflow:hidden;border:1px solid var(--gold-d);flex-shrink:0;';
+      const ce=makeCoverEl(g,46,46);
+      ce.style.cssText=ce.tagName==='CANVAS'?'width:46px;height:46px;display:block;':'width:46px;height:46px;object-fit:cover;display:block;';
+      cw.appendChild(ce); d.appendChild(cw);
+      d.insertAdjacentHTML('beforeend',`<span class="pcard-name">${g}</span><button class="pcard-rm" onclick="unpick(${JSON.stringify(g)})">✕</button>`);
+      pc.appendChild(d);
+    }
   });
 
   const ppl=document.getElementById('played-list-picker'); ppl.innerHTML='';
@@ -1046,22 +1371,173 @@ function renderAll(){
   // HISTORY
   const hl=document.getElementById('hist-list'); hl.innerHTML='';
   if(!st.history.length){hl.innerHTML='<p class="hist-empty">El libro de crónicas está vacío.<br>¡Confirma una sesión para empezar!</p>';}
-  else st.history.forEach(s=>{
+  else st.history.forEach((s,idx)=>{
     const d=document.createElement('div'); d.className='hist-entry';
-    d.insertAdjacentHTML('afterbegin',`<div class="hist-date">⚔ ${s.date}</div>`);
+    // Header with date and edit button
+    const hdr=document.createElement('div'); hdr.className='hist-header';
+    hdr.innerHTML=`<div class="hist-date">⚔ ${s.date}</div>`;
+    const editBtn=document.createElement('button'); editBtn.className='hist-edit-btn'; editBtn.textContent='✎ Editar nota';
+    editBtn.onclick=()=>openHistoryNoteEditor(idx);
+    hdr.appendChild(editBtn);
+    d.appendChild(hdr);
+    // Games with play count
     const hg=document.createElement('div'); hg.className='hist-games';
     s.games.forEach(g=>{
       const hitem=document.createElement('span'); hitem.className='hist-game';
       const hw=document.createElement('div'); hw.className='hist-cover';
       const hc=makeCoverEl(g,24,24);
-      if(hc.tagName==='CANVAS') hc.style.cssText='width:24px;height:24px;display:block;';
-      else hc.style.cssText='width:24px;height:24px;object-fit:cover;display:block;';
+      hc.style.cssText=hc.tagName==='CANVAS'?'width:24px;height:24px;display:block;':'width:24px;height:24px;object-fit:cover;display:block;';
       hw.appendChild(hc); hitem.appendChild(hw);
       hitem.insertAdjacentText('beforeend', g);
+      // Show cumulative play count at time of this session
+      const totalPlays = st.meta[g]?.plays;
+      if(totalPlays) hitem.insertAdjacentHTML('beforeend',`<span class="hist-game-plays">#${totalPlays}</span>`);
       hg.appendChild(hitem);
     });
-    d.appendChild(hg); hl.appendChild(d);
+    d.appendChild(hg);
+    // Note global (legacy) + per-game notes
+    if(s.note){
+      const hn=document.createElement('div'); hn.className='hist-note'; hn.textContent=s.note;
+      d.appendChild(hn);
+    }
+    if(s.gameNotes && Object.keys(s.gameNotes).length>0){
+      Object.entries(s.gameNotes).forEach(([g,note])=>{
+        const hn=document.createElement('div'); hn.className='hist-note';
+        hn.innerHTML=`<strong style="color:var(--gold-d);font-family:'Cinzel',serif;font-size:10px;">${g}:</strong> ${note}`;
+        d.appendChild(hn);
+      });
+    }
+    hl.appendChild(d);
   });
+}
+
+// ─── STATS ───────────────────────────────────────────────────
+function renderStats(){
+  const allGames = [...st.available, ...st.played];
+  const totalGames = allGames.length;
+  const totalSessions = st.history.length;
+  const totalPlays = Object.values(st.meta).reduce((a,m)=>a+(m.plays||0),0);
+  const unplayed = allGames.filter(g=>!st.played.includes(g)&&(!st.meta[g]?.status||st.meta[g]?.status==='unplayed')).length;
+
+  // KPIs
+  document.getElementById('stats-kpi').innerHTML=`
+    <div class="kpi"><div class="kpi-val">${totalGames}</div><div class="kpi-lbl">Juegos</div></div>
+    <div class="kpi"><div class="kpi-val">${totalSessions}</div><div class="kpi-lbl">Sesiones</div></div>
+    <div class="kpi"><div class="kpi-val">${totalPlays}</div><div class="kpi-lbl">Partidas</div></div>
+    <div class="kpi"><div class="kpi-val">${unplayed}</div><div class="kpi-lbl">Sin estrenar</div></div>
+  `;
+
+  // Top games by plays
+  const topEl = document.getElementById('stats-top-games');
+  const withPlays = allGames.map(g=>({g, plays:st.meta[g]?.plays||0})).filter(x=>x.plays>0).sort((a,b)=>b.plays-a.plays).slice(0,10);
+  if(!withPlays.length){topEl.innerHTML='<p class="stats-empty">Todavía no hay partidas registradas.</p>';}
+  else{
+    const max = withPlays[0].plays;
+    topEl.innerHTML = withPlays.map(({g,plays})=>`
+      <div class="stats-bar-row">
+        <span class="stats-bar-label">${g}</span>
+        <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${Math.round(plays/max*100)}%"></div></div>
+        <span class="stats-bar-val">${plays}</span>
+      </div>`).join('');
+  }
+
+  // Partidas por mes (últimos 12 meses)
+  const monthCounts = {};
+  const now = new Date();
+  for(let i=11;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    monthCounts[key] = 0;
+  }
+  st.history.forEach(s=>{
+    // Try to parse date from session
+    s.games.forEach(g=>{
+      const lp = st.meta[g]?.lastPlayed;
+      if(lp){
+        const d = new Date(lp); if(isNaN(d)) return;
+        const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if(key in monthCounts) monthCounts[key]=(monthCounts[key]||0);
+      }
+    });
+  });
+  // Count sessions per month using history dates
+  st.history.forEach(s=>{
+    const d = new Date(s.date);
+    if(isNaN(d)) return;
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if(key in monthCounts) monthCounts[key]=(monthCounts[key]||0)+s.games.length;
+  });
+
+  const months = Object.keys(monthCounts);
+  const vals = months.map(k=>monthCounts[k]);
+  const maxVal = Math.max(...vals, 1);
+  const canvas = document.getElementById('stats-chart-month');
+  const wrap = canvas.parentElement;
+  canvas.width = wrap.offsetWidth - 24;
+  canvas.height = 136;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const W=canvas.width, H=canvas.height;
+  const barW = Math.floor(W/months.length)-4;
+  const pad = 20;
+  months.forEach((m,i)=>{
+    const v = vals[i];
+    const x = i*(W/months.length)+2;
+    const barH = v>0 ? Math.max(4, Math.round((v/maxVal)*(H-pad))) : 2;
+    const y = H-barH;
+    // Bar
+    const grad = ctx.createLinearGradient(0,y,0,H);
+    grad.addColorStop(0,'#D4A847'); grad.addColorStop(1,'#9B7520');
+    ctx.fillStyle = v>0 ? grad : '#272420';
+    ctx.beginPath();
+    ctx.roundRect(x, y, barW, barH, [3,3,0,0]);
+    ctx.fill();
+    // Value label
+    if(v>0){
+      ctx.fillStyle='#F0CC7A';
+      ctx.font='bold 9px Cinzel, serif';
+      ctx.textAlign='center';
+      ctx.fillText(v, x+barW/2, y-3);
+    }
+    // Month label
+    const label = m.slice(5); // MM
+    const monthNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    ctx.fillStyle='#5A5040';
+    ctx.font='8px Cinzel, serif';
+    ctx.textAlign='center';
+    ctx.fillText(monthNames[parseInt(label)-1], x+barW/2, H+1);
+  });
+
+  // Tags distribution
+  const tagsEl = document.getElementById('stats-tags-chart');
+  const tagCounts = {};
+  TAGS.forEach(t=>tagCounts[t.id]=0);
+  allGames.forEach(g=>{ const meta=st.meta[g]; if(meta?.tags) meta.tags.forEach(t=>{if(t in tagCounts) tagCounts[t]++;}) });
+  const tagsSorted = TAGS.map(t=>({...t, count:tagCounts[t.id]})).filter(t=>t.count>0).sort((a,b)=>b.count-a.count);
+  if(!tagsSorted.length){tagsEl.innerHTML='<p class="stats-empty">Ningún juego tiene etiquetas aún.</p>';}
+  else{
+    const maxT=tagsSorted[0].count;
+    tagsEl.innerHTML=tagsSorted.map(t=>`
+      <div class="stats-tag-row">
+        <span class="stats-tag-pill" style="background:${t.bg};color:${t.tc};border-color:${t.bc};">${t.l}</span>
+        <div class="stats-bar-track" style="flex:2"><div class="stats-bar-fill" style="width:${Math.round(t.count/maxT*100)}%;background:linear-gradient(90deg,${t.bc},${t.tc})"></div></div>
+        <span class="stats-bar-val">${t.count}</span>
+      </div>`).join('');
+  }
+
+  // Status distribution
+  const statusEl = document.getElementById('stats-status-chart');
+  const statusMap = {unplayed:{l:'Sin estrenar',bg:'#2a1000',tc:'#F0997B',bc:'#993C1D'},learning:{l:'Aprendido',bg:'#041228',tc:'#85B7EB',bc:'#185FA5'},mastered:{l:'Dominado',bg:'#061509',tc:'#81C784',bc:'#2E7D32'},'':{l:'Sin clasificar',bg:'#1a1a18',tc:'#B4B2A9',bc:'#5F5E5A'}};
+  const statusCounts = {'':0, unplayed:0, learning:0, mastered:0};
+  allGames.forEach(g=>{ const s=st.meta[g]?.status||''; if(s in statusCounts) statusCounts[s]++; });
+  const statusSorted = Object.entries(statusCounts).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const maxS = Math.max(...statusSorted.map(([,v])=>v),1);
+  statusEl.innerHTML=statusSorted.map(([k,v])=>{const sm=statusMap[k];return `
+    <div class="stats-tag-row">
+      <span class="stats-tag-pill" style="background:${sm.bg};color:${sm.tc};border-color:${sm.bc};">${sm.l}</span>
+      <div class="stats-bar-track" style="flex:2"><div class="stats-bar-fill" style="width:${Math.round(v/maxS*100)}%;background:linear-gradient(90deg,${sm.bc},${sm.tc})"></div></div>
+      <span class="stats-bar-val">${v}</span>
+    </div>`;}).join('');
 }
 
 // ─── TABS ────────────────────────────────────────────────────
@@ -1070,7 +1546,8 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     const w=t.dataset.tab;
-    ['picker','collection','history','settings'].forEach(id=>document.getElementById('tab-'+id).style.display=id===w?'':'none');
+    ['picker','collection','history','stats','settings'].forEach(id=>document.getElementById('tab-'+id).style.display=id===w?'':'none');
+    if(w==='stats') renderStats();
   };
 });
 
@@ -1080,6 +1557,9 @@ document.getElementById('btn-confirm').onclick=confirmPlayed;
 document.getElementById('btn-cancel').onclick=cancelPick;
 document.getElementById('btn-add').onclick=addGame;
 document.getElementById('add-in').addEventListener('keydown',e=>{if(e.key==='Enter') addGame();});
+document.getElementById('session-save').onclick=()=>finishSession(collectGameNotes());
+document.getElementById('session-skip').onclick=()=>finishSession({});
+document.getElementById('session-modal-overlay').onclick=e=>{if(e.target===document.getElementById('session-modal-overlay')) finishSession({});};
 
 document.getElementById('btn-export').onclick=()=>{
   const blob=new Blob([JSON.stringify(st,null,2)],{type:'application/json'});
@@ -1365,13 +1845,13 @@ async function gdFindFile(){
 }
 
 async function gdSave(){
-  const payload = JSON.stringify(st, null, 2);
+  if(!confirm('¿Guardar en Google Drive? Esto sobreescribirá los datos que haya guardados allí.')) return;
+  // Include images in the payload for cross-device sync
+  const payload = JSON.stringify({...st, _imgs: imgs}, null, 2);
   const blob = new Blob([payload], {type:'application/json'});
 
   try{
     if(!gd.fileId){
-      // Create new file in appDataFolder
-      // First create metadata
       const meta = {name: GD_FILENAME, parents: ['appDataFolder']};
       const form = new FormData();
       form.append('metadata', new Blob([JSON.stringify(meta)],{type:'application/json'}));
@@ -1384,7 +1864,6 @@ async function gdSave(){
       const data = await r.json();
       gd.fileId = data.id; saveGD();
     } else {
-      // Update existing file
       const r = await gdRequest('PATCH',
         `https://www.googleapis.com/upload/drive/v3/files/${gd.fileId}?uploadType=media`,
         payload, false
@@ -1392,10 +1871,11 @@ async function gdSave(){
       if(!r) return;
     }
     toast('Guardado en Google Drive','☁');
-  }catch(e){ toast('Error al guardar en Drive','⚠'); }
+  }catch(e){ toast('Error al guardar en Drive — puede que el archivo sea demasiado grande','⚠'); console.error(e); }
 }
 
 async function gdLoad(){
+  if(!confirm('¿Cargar datos desde Google Drive? Los datos locales serán reemplazados.')) return;
   if(!gd.fileId){ await gdFindFile(); }
   if(!gd.fileId){ toast('No hay datos en Drive todavía','⚠'); return; }
   try{
@@ -1405,13 +1885,15 @@ async function gdLoad(){
     if(!r) return;
     const data = await r.json();
     if(data.available && Array.isArray(data.available)){
+      // Restore images if present
+      if(data._imgs){ imgs = data._imgs; saveImgs(); delete data._imgs; }
       st = data;
       if(!st.meta) st.meta={};
       if(!st.history) st.history=[];
       save(); renderAll();
-      toast('Datos cargados desde Drive','☁');
+      toast('Datos e imágenes cargados desde Drive','☁');
     } else { toast('Archivo en Drive no reconocido','⚠'); }
-  }catch(e){ toast('Error al cargar desde Drive','⚠'); }
+  }catch(e){ toast('Error al cargar desde Drive','⚠'); console.error(e); }
 }
 
 function gdDisconnect(){
