@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Game Picker">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0D0C0A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Game Picker 🎲</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -257,8 +263,28 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 .surprise-front small{display:block;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold-d);margin-top:4px;text-transform:uppercase;}
 .surprise-back{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold-l);text-align:center;line-height:1.4;}
 
-/* WEIGHT INFO */
-.weight-info{font-size:11px;color:var(--text3);font-style:italic;margin-top:4px;}
+/* BGG SEARCH */
+.bgg-search-wrap{margin-bottom:1rem;position:relative;}
+.bgg-results{position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--ink3);border:1px solid var(--gold-d);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.6);max-height:360px;overflow-y:auto;}
+.bgg-result-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;}
+.bgg-result-item:last-child{border-bottom:none;}
+.bgg-result-item:hover{background:var(--ink4);}
+.bgg-result-img{width:44px;height:44px;border-radius:6px;object-fit:cover;background:var(--ink4);flex-shrink:0;border:1px solid var(--border2);}
+.bgg-result-ph{width:44px;height:44px;border-radius:6px;background:var(--ink4);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.bgg-result-info{flex:1;min-width:0;}
+.bgg-result-name{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bgg-result-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;}
+.bgg-result-meta span{display:flex;align-items:center;gap:3px;}
+.bgg-result-rating{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0;}
+.bgg-loading{padding:1rem;text-align:center;font-size:13px;color:var(--text3);font-style:italic;}
+.bgg-import-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.bgg-import-row input{font-family:'Crimson Pro',serif;font-size:14px;flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--ink3);color:var(--text);min-width:0;outline:none;}
+.bgg-import-row input:focus{border-color:var(--gold-d);}
+.bgg-import-row input::placeholder{color:var(--text4);font-style:italic;}
+.bgg-import-progress{margin-top:8px;font-size:12px;color:var(--text3);font-style:italic;padding:8px 10px;background:var(--ink3);border-radius:8px;border:1px solid var(--border);}
+.bgg-data-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.bgg-data-chip{font-size:9px;font-family:'Cinzel',serif;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--ink4);border:1px solid var(--border2);color:var(--text3);}
+.bgg-community-rating{font-size:9px;font-family:'Cinzel',serif;color:var(--gold-d);}
 
 /* STATS */
 .stats-kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:.5rem;}
@@ -378,9 +404,18 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <button class="btn sm" id="multisel-veto" style="color:#F4A7C3;border-color:#8B2252;">⏸ Vetar este finde</button>
       <button class="btn sm ghost" id="multisel-cancel">✕ Cancelar</button>
     </div>
-    <div class="add-row">
-      <input type="text" id="add-in" placeholder="Añadir juego a la colección..." autocomplete="off"/>
-      <button class="btn primary" id="btn-add">+ Añadir</button>
+    <div class="bgg-search-wrap">
+      <div class="add-row">
+        <input type="text" id="add-in" placeholder="Buscar en BGG o escribir nombre..." autocomplete="off"/>
+        <button class="btn primary" id="btn-add">+ Añadir</button>
+        <button class="btn sm" id="btn-bgg-import" title="Importar colección de BGG">📥 BGG</button>
+      </div>
+      <div id="bgg-results" class="bgg-results" style="display:none;"></div>
+      <div id="bgg-import-row" class="bgg-import-row" style="display:none;">
+        <input type="text" id="bgg-user-input" placeholder="Tu usuario de BGG..." autocomplete="off"/>
+        <button class="btn sm primary" id="btn-bgg-import-go">Importar colección</button>
+        <button class="btn sm ghost" id="btn-bgg-import-cancel">✕</button>
+      </div>
     </div>
     <div class="filter-row" id="col-filter-row">
       <span class="filter-lbl">Filtrar</span>
@@ -485,6 +520,7 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
     <input type="file" id="img-file-input" accept="image/*" style="display:none;">
     <h3 id="modal-title"></h3>
     <p class="msub">Etiquetas y notas personales</p>
+    <div id="modal-bgg-data"></div>
     <div class="modal-row">
       <div class="modal-field">
         <div class="note-lbl">Puntuación</div>
@@ -1146,6 +1182,20 @@ function openModal(g){
   });
 
   document.getElementById('note-area').value = meta.note||'';
+
+  // BGG data chips
+  let bggHtml='';
+  if(meta.bggId){
+    const chips=[];
+    if(meta.year) chips.push(`📅 ${meta.year}`);
+    if(meta.minPlayers&&meta.maxPlayers) chips.push(`👥 ${meta.minPlayers}${meta.minPlayers!==meta.maxPlayers?'-'+meta.maxPlayers:''}`);
+    if(meta.minTime&&meta.maxTime) chips.push(`⏱ ${meta.minTime}${meta.minTime!==meta.maxTime?'-'+meta.maxTime:''}min`);
+    if(meta.weight) chips.push(`⚖️ ${meta.weight.toFixed(1)}/5`);
+    if(meta.bggRating) chips.push(`⭐ BGG ${meta.bggRating.toFixed(1)}`);
+    if(chips.length) bggHtml=`<div class="bgg-data-row">${chips.map(c=>`<span class="bgg-data-chip">${c}</span>`).join('')}</div>`;
+  }
+  const bggDataEl=document.getElementById('modal-bgg-data');
+  if(bggDataEl) bggDataEl.innerHTML=bggHtml;
 
   // Rating
   modalRating = meta.rating||0;
@@ -1905,6 +1955,198 @@ document.getElementById('gd-connect-btn').onclick = gdConnect;
 document.getElementById('gd-save-btn').onclick = gdSave;
 document.getElementById('gd-load-btn').onclick = gdLoad;
 document.getElementById('gd-disconnect-btn').onclick = gdDisconnect;
+
+// ─── BGG INTEGRATION ─────────────────────────────────────────
+const BGG_PROXY = 'https://gamepicker-bgg.dreamsmash.workers.dev';
+let bggSearchTimer = null;
+let bggSearchActive = false;
+
+// Search BGG as user types
+document.getElementById('add-in').addEventListener('input', e=>{
+  const q = e.target.value.trim();
+  clearTimeout(bggSearchTimer);
+  const resultsEl = document.getElementById('bgg-results');
+  if(q.length < 2){ resultsEl.style.display='none'; return; }
+  bggSearchTimer = setTimeout(()=>bggSearch(q), 500);
+});
+
+document.getElementById('add-in').addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeBggResults();
+  if(e.key==='Enter'){
+    closeBggResults();
+    addGame();
+  }
+});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.bgg-search-wrap')) closeBggResults();
+});
+
+function closeBggResults(){
+  document.getElementById('bgg-results').style.display='none';
+}
+
+async function bggSearch(q){
+  const resultsEl = document.getElementById('bgg-results');
+  resultsEl.innerHTML='<div class="bgg-loading">🔍 Buscando en BoardGameGeek...</div>';
+  resultsEl.style.display='';
+  try{
+    const r = await fetch(`${BGG_PROXY}/search?q=${encodeURIComponent(q)}`);
+    const items = await r.json();
+    if(!items.length){ resultsEl.innerHTML='<div class="bgg-loading">Sin resultados. Pulsa + Añadir para añadirlo manualmente.</div>'; return; }
+    resultsEl.innerHTML='';
+    items.forEach(item=>{
+      const div=document.createElement('div'); div.className='bgg-result-item';
+      const em = EMOJI[item.name]||'🎲';
+      div.innerHTML=`
+        <div class="bgg-result-ph">${em}</div>
+        <div class="bgg-result-info">
+          <div class="bgg-result-name">${item.name}</div>
+          <div class="bgg-result-meta"><span>${item.year||'?'}</span></div>
+        </div>`;
+      div.onclick=()=>bggAddGame(item.id, item.name);
+      resultsEl.appendChild(div);
+    });
+  }catch(e){
+    resultsEl.innerHTML='<div class="bgg-loading">⚠ Error al conectar con BGG. Añade el juego manualmente.</div>';
+  }
+}
+
+async function bggAddGame(id, name){
+  closeBggResults();
+  document.getElementById('add-in').value='';
+  // Check duplicate
+  if([...st.available,...st.played].some(g=>g.toLowerCase()===name.toLowerCase())){
+    toast('Ese juego ya está en la colección','⚠'); return;
+  }
+  toast(`Añadiendo ${name}...`,'⏳');
+  try{
+    const r = await fetch(`${BGG_PROXY}/thing?id=${id}`);
+    const data = await r.json();
+    const gameName = data.name || name;
+    // Add to collection
+    st.available.push(gameName);
+    if(!st.meta[gameName]) st.meta[gameName]={tags:[],note:'',emoji:'',rating:0,status:'unplayed'};
+    // Store BGG data in meta
+    st.meta[gameName].bggId = id;
+    st.meta[gameName].bggRating = data.rating;
+    st.meta[gameName].minPlayers = data.minPlayers;
+    st.meta[gameName].maxPlayers = data.maxPlayers;
+    st.meta[gameName].minTime = data.minTime;
+    st.meta[gameName].maxTime = data.maxTime;
+    st.meta[gameName].weight = data.weight;
+    st.meta[gameName].year = data.year;
+    // Save image
+    if(data.imgBase64){ imgs[gameName]=data.imgBase64; saveImgs(); }
+    save(); renderAll();
+    toast(`${gameName} añadido con portada de BGG`,'✦');
+  }catch(e){
+    // Add without image
+    if(![...st.available,...st.played].some(g=>g.toLowerCase()===name.toLowerCase())){
+      st.available.push(name); save(); renderAll();
+    }
+    toast(`${name} añadido (sin datos BGG)`,'✦');
+  }
+}
+
+// BGG Import
+document.getElementById('btn-bgg-import').onclick=()=>{
+  const row = document.getElementById('bgg-import-row');
+  row.style.display = row.style.display==='none' ? '' : 'none';
+};
+document.getElementById('btn-bgg-import-cancel').onclick=()=>{
+  document.getElementById('bgg-import-row').style.display='none';
+};
+document.getElementById('btn-bgg-import-go').onclick=bggImportCollection;
+
+async function bggImportCollection(){
+  const user = document.getElementById('bgg-user-input').value.trim();
+  if(!user){ toast('Escribe tu usuario de BGG','⚠'); return; }
+  const btn = document.getElementById('btn-bgg-import-go');
+  btn.disabled=true; btn.textContent='Cargando...';
+  // Show progress
+  const wrap = document.querySelector('.bgg-search-wrap');
+  let progressEl = document.getElementById('bgg-import-progress');
+  if(!progressEl){
+    progressEl=document.createElement('div'); progressEl.id='bgg-import-progress';
+    progressEl.className='bgg-import-progress'; wrap.appendChild(progressEl);
+  }
+  progressEl.textContent='Conectando con BGG...';
+  try{
+    // BGG sometimes returns 202 (queued), retry up to 3 times
+    let items=[], attempts=0;
+    while(attempts<3){
+      const r = await fetch(`${BGG_PROXY}/collection?user=${encodeURIComponent(user)}`);
+      const data = await r.json();
+      if(data.status==='queued'){
+        progressEl.textContent=`BGG está procesando la solicitud... intento ${attempts+1}/3`;
+        await new Promise(res=>setTimeout(res,3000));
+        attempts++; continue;
+      }
+      items=data; break;
+    }
+    if(!items.length){ progressEl.textContent='No se encontraron juegos o usuario incorrecto.'; btn.disabled=false; btn.textContent='Importar colección'; return; }
+
+    progressEl.textContent=`Encontrados ${items.length} juegos. Importando imágenes...`;
+    let added=0, skipped=0;
+    const all=[...st.available,...st.played];
+    // Add games without images first
+    items.forEach(item=>{
+      if(all.some(g=>g.toLowerCase()===item.name.toLowerCase())){ skipped++; return; }
+      st.available.push(item.name);
+      if(!st.meta[item.name]) st.meta[item.name]={tags:[],note:'',emoji:'',rating:0,status:'unplayed'};
+      st.meta[item.name].bggId=item.id; st.meta[item.name].year=item.year;
+      added++;
+    });
+    save(); renderAll();
+    progressEl.textContent=`✓ ${added} juegos añadidos, ${skipped} ya existían. Cargando portadas...`;
+
+    // Fetch images in background, 3 at a time
+    const toFetch = items.filter(item=>{
+      const inColl=[...st.available,...st.played].find(g=>g.toLowerCase()===item.name.toLowerCase());
+      return inColl && !imgs[inColl] && item.thumb;
+    }).slice(0,60); // max 60 images
+
+    let done=0;
+    for(let i=0;i<toFetch.length;i+=3){
+      const batch=toFetch.slice(i,i+3);
+      await Promise.all(batch.map(async item=>{
+        try{
+          const r=await fetch(`${BGG_PROXY}/thing?id=${item.id}`);
+          const data=await r.json();
+          const gameName=[...st.available,...st.played].find(g=>g.toLowerCase()===item.name.toLowerCase());
+          if(gameName&&data.imgBase64){ imgs[gameName]=data.imgBase64; }
+          // Store extra data
+          if(gameName&&st.meta[gameName]){
+            if(data.bggRating) st.meta[gameName].bggRating=data.bggRating;
+            if(data.minPlayers) st.meta[gameName].minPlayers=data.minPlayers;
+            if(data.maxPlayers) st.meta[gameName].maxPlayers=data.maxPlayers;
+            if(data.minTime) st.meta[gameName].minTime=data.minTime;
+            if(data.maxTime) st.meta[gameName].maxTime=data.maxTime;
+            if(data.weight) st.meta[gameName].weight=data.weight;
+          }
+          done++;
+        }catch(e){}
+      }));
+      saveImgs(); save(); renderAll();
+      progressEl.textContent=`Cargando portadas... ${done}/${toFetch.length}`;
+    }
+    progressEl.textContent=`✓ Importación completada. ${added} juegos añadidos con portadas.`;
+    setTimeout(()=>{ progressEl.remove(); document.getElementById('bgg-import-row').style.display='none'; },3000);
+  }catch(e){
+    progressEl.textContent='⚠ Error al importar. Comprueba el usuario e inténtalo de nuevo.';
+  }
+  btn.disabled=false; btn.textContent='Importar colección';
+}
+
+// ─── SERVICE WORKER ───────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js')
+      .then(()=>console.log('SW registrado'))
+      .catch(e=>console.log('SW error:', e));
+  });
+}
 
 // ─── INIT ─────────────────────────────────────────────────────
 loadImgs();
