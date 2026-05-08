@@ -507,6 +507,20 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
   </div>
 </div>
 
+<!-- WELCOME SCREEN -->
+<div class="overlay" id="welcome-overlay" style="display:none;">
+  <div class="modal" style="text-align:center;max-width:420px;">
+    <div style="font-size:52px;margin-bottom:1rem;">🎲</div>
+    <h3 style="margin-bottom:.5rem;">Bienvenido a Game Picker</h3>
+    <p class="msub" style="margin-bottom:1.5rem;font-size:14px;line-height:1.7;">Tu biblioteca personal de juegos de mesa. Añade tus juegos buscando en BoardGameGeek o importa tu colección completa de BGG de un golpe.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn primary" id="welcome-bgg" style="width:100%;padding:12px;">📥 Importar mi colección de BGG</button>
+      <button class="btn" id="welcome-manual" style="width:100%;padding:12px;">✦ Empezar desde cero</button>
+    </div>
+    <p style="font-size:11px;color:var(--text4);margin-top:1rem;font-style:italic;">Puedes importar o añadir juegos en cualquier momento desde la pestaña Colección</p>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="overlay" id="modal" style="display:none;">
   <div class="modal">
@@ -642,7 +656,7 @@ const TAGS = [
   {id:'medio',l:'Medio',bg:'#041228',tc:'#85B7EB',bc:'#185FA5'},
 ];
 
-const INITIAL = GAMES_DEF.map(g => g.name);
+const INITIAL = []; // Nuevos usuarios empiezan con colección vacía
 const KEY = 'gp_v5';
 const IMG_KEY = 'gp_imgs_v5'; // name -> base64 dataURL
 
@@ -1802,6 +1816,7 @@ loadGD();
 buildFilterRow();
 updateFilterInfo();
 renderAll();
+checkWelcome();
 
 function loadGD(){
   try{ const r=localStorage.getItem(GD_KEY); if(r) gd=JSON.parse(r); }catch(e){}
@@ -2138,6 +2153,32 @@ async function bggImportCollection(){
   }
   btn.disabled=false; btn.textContent='Importar colección';
 }
+
+// ─── WELCOME SCREEN ───────────────────────────────────────────
+function checkWelcome(){
+  const allGames = [...st.available, ...st.played];
+  if(allGames.length === 0 && !localStorage.getItem('gp_welcomed')){
+    document.getElementById('welcome-overlay').style.display='flex';
+  }
+}
+
+document.getElementById('welcome-bgg').onclick=()=>{
+  document.getElementById('welcome-overlay').style.display='none';
+  localStorage.setItem('gp_welcomed','1');
+  // Switch to collection tab and open import row
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-tab="collection"]').classList.add('active');
+  ['picker','collection','history','stats','settings'].forEach(id=>
+    document.getElementById('tab-'+id).style.display=id==='collection'?'':'none'
+  );
+  document.getElementById('bgg-import-row').style.display='';
+  document.getElementById('bgg-user-input').focus();
+};
+
+document.getElementById('welcome-manual').onclick=()=>{
+  document.getElementById('welcome-overlay').style.display='none';
+  localStorage.setItem('gp_welcomed','1');
+};
 
 // ─── SERVICE WORKER ───────────────────────────────────────────
 if('serviceWorker' in navigator){
