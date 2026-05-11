@@ -364,7 +364,10 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <span class="filter-lbl">Filtrar</span>
     </div>
     <div class="filter-info" id="filter-info" style="display:none;"></div>
-    <div class="sec">Esta semana</div>
+    <div class="sec">
+      <span>Sesión del</span>
+      <input type="date" id="session-date-input" style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;padding:4px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--ink3);color:var(--gold);outline:none;letter-spacing:.04em;">
+    </div>
     <div class="picked-box" id="picked-box">
       <p class="picked-empty" id="pe">Pulsa <em>"Tirar los dados"</em> para que el destino elija por ti...</p>
       <div class="picked-cards" id="pc"></div>
@@ -953,9 +956,11 @@ function confirmPlayed(){
 
 function finishSession(notes){
   document.getElementById('session-modal-overlay').style.display='none';
-  const date=new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const dateShort=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'});
-  // notes is either a string (legacy/edit) or object {gameName: note}
+  // Use selected date from picker, fallback to today
+  const dateInput = document.getElementById('session-date-input');
+  const selectedDate = dateInput.value ? new Date(dateInput.value + 'T12:00:00') : new Date();
+  const date = selectedDate.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const dateShort = selectedDate.toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'});
   const entry={date, games:[...st.picked], gameNotes: typeof notes==='object' && notes!==null ? notes : {}};
   if(typeof notes==='string' && notes) entry.note=notes;
   st.history.unshift(entry);
@@ -1255,7 +1260,7 @@ function makeGCard(g, opts={}){
   const div=document.createElement('div');
   const isSelected = selectedGames.has(g);
   const isVetoed = meta.vetoed;
-  div.className='gcard'+(opts.played?' played':'')+(isSelected?' selected':'')+(isVetoed?' vetoed':'');
+  div.className='gcard'+(opts.played&&!opts.noFade?' played':'')+(isSelected?' selected':'')+(isVetoed?' vetoed':'');
 
   div.addEventListener('dragover', e=>{e.preventDefault(); div.classList.add('drag-over');});
   div.addEventListener('dragleave', ()=>div.classList.remove('drag-over'));
@@ -1398,7 +1403,7 @@ function renderAll(){
   document.getElementById('b-av').textContent = colToShow.length;
   colToShow.forEach(g=>{
     const isPlayed = st.played.includes(g);
-    ag.appendChild(makeGCard(g, isPlayed ? {played:true} : {}));
+    ag.appendChild(makeGCard(g, isPlayed ? {played:true, noFade:true} : {}));
   });
 
   // HISTORY
@@ -1998,6 +2003,9 @@ buildFilterRow();
 updateFilterInfo();
 renderAll();
 checkWelcome();
+// Set session date to today
+const _today = new Date();
+document.getElementById('session-date-input').value = _today.toISOString().split('T')[0];
 </script>
 </body>
 </html>
