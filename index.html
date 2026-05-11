@@ -327,7 +327,7 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
     <div class="logo-sub">Colección personal</div>
   </div>
   <div class="hstats">
-    <div class="hstat"><div class="hstat-v" id="s-av">0</div><div class="hstat-l">disponibles</div></div>
+    <div class="hstat"><div class="hstat-v" id="s-av">0</div><div class="hstat-l">colección</div></div>
     <div class="hstat"><div class="hstat-v" id="s-pl">0</div><div class="hstat-l">jugados</div></div>
     <div class="hstat"><div class="hstat-v" id="s-hi">0</div><div class="hstat-l">sesiones</div></div>
   </div>
@@ -377,7 +377,7 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <button class="btn sm primary" id="btn-manual-pick">+ Añadir</button>
     </div>
     <div class="sec">Ya jugados <span class="badge badge-blue" id="b-pl">0</span></div>
-    <div class="game-list" id="played-list-picker"></div>
+    <div class="game-grid" id="played-list-picker"></div>
   </div>
 
   <!-- COLLECTION -->
@@ -399,13 +399,8 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
     <div class="filter-row" id="col-filter-row">
       <span class="filter-lbl">Filtrar</span>
     </div>
-    <div class="sec">Disponibles <span class="badge badge-gold" id="b-av">0</span></div>
+    <div class="sec">Mi colección <span class="badge badge-gold" id="b-av">0</span></div>
     <div class="game-grid" id="avail-grid"></div>
-    <div id="played-sec" style="display:none;">
-      <div class="divider"></div>
-      <div class="sec">Ya jugados <span class="badge badge-green" id="b-pl2">0</span></div>
-      <div class="game-grid" id="played-grid"></div>
-    </div>
   </div>
 
   <!-- HISTORY -->
@@ -1346,10 +1341,9 @@ function makeGItem(g, opts={}){
 
 // ─── RENDER ──────────────────────────────────────────────────
 function renderAll(){
-  document.getElementById('s-av').textContent=st.available.length;
+  document.getElementById('s-av').textContent=st.available.length + st.played.length;
   document.getElementById('s-pl').textContent=st.played.length;
   document.getElementById('s-hi').textContent=st.history.length;
-  // b-av and b-pl2 are updated in collection section with filtered counts
   document.getElementById('b-pl').textContent=st.played.length;
 
   // PICKER - picked cards
@@ -1375,8 +1369,9 @@ function renderAll(){
     }
   });
 
+  // Played games in picker - shown as grid with covers
   const ppl=document.getElementById('played-list-picker'); ppl.innerHTML='';
-  [...st.played].filter(g=>!st.picked.includes(g)).sort((a,b)=>a.localeCompare(b,'es')).forEach(g=>ppl.appendChild(makeGItem(g,{played:true,restore:true})));
+  [...st.played].filter(g=>!st.picked.includes(g)).sort((a,b)=>a.localeCompare(b,'es')).forEach(g=>ppl.appendChild(makeGCard(g,{played:true,restore:true})));
 
   // Manual pick selector - show filtered available games not yet picked
   const manualSel = document.getElementById('manual-pick-sel');
@@ -1390,28 +1385,21 @@ function renderAll(){
   });
   if(currentVal && pool.includes(currentVal)) manualSel.value=currentVal;
 
-  // COLLECTION
+  // COLLECTION - all games together (available + played), filterable
   const ag=document.getElementById('avail-grid'); ag.innerHTML='';
-  let availToShow = [...st.available].sort((a,b)=>a.localeCompare(b,'es'));
-  let playedOnly = st.played.filter(g=>!st.picked.includes(g));
-  let playedToShow = [...playedOnly].sort((a,b)=>a.localeCompare(b,'es'));
+  const allColGames = [...st.available, ...st.played].sort((a,b)=>a.localeCompare(b,'es'));
+  let colToShow = allColGames;
   if(activeColFilters.size>0){
-    availToShow = availToShow.filter(g=>{
-      const meta=st.meta[g];
-      return meta&&meta.tags&&meta.tags.some(t=>activeColFilters.has(t));
-    });
-    playedToShow = playedToShow.filter(g=>{
+    colToShow = allColGames.filter(g=>{
       const meta=st.meta[g];
       return meta&&meta.tags&&meta.tags.some(t=>activeColFilters.has(t));
     });
   }
-  // Update badges with filtered counts
-  document.getElementById('b-av').textContent = availToShow.length;
-  document.getElementById('b-pl2').textContent = playedToShow.length;
-  availToShow.forEach(g=>ag.appendChild(makeGCard(g)));
-  document.getElementById('played-sec').style.display=playedToShow.length?'':'none';
-  const pg=document.getElementById('played-grid'); pg.innerHTML='';
-  playedToShow.forEach(g=>pg.appendChild(makeGCard(g,{played:true})));
+  document.getElementById('b-av').textContent = colToShow.length;
+  colToShow.forEach(g=>{
+    const isPlayed = st.played.includes(g);
+    ag.appendChild(makeGCard(g, isPlayed ? {played:true} : {}));
+  });
 
   // HISTORY
   const hl=document.getElementById('hist-list'); hl.innerHTML='';
