@@ -1032,7 +1032,13 @@ function openHistoryNoteEditor(idx){
 }
 
 function cancelPick(){ st.picked=[]; surpriseRevealed.clear(); save(); renderAll(); document.getElementById('btn-confirm').style.display='none'; document.getElementById('btn-cancel').style.display='none'; }
-function unpick(g){ const i=st.picked.indexOf(g); if(i>-1) st.picked.splice(i,1); save(); renderAll(); }
+function unpick(g){
+  const i=st.picked.indexOf(g);
+  if(i>-1) st.picked.splice(i,1);
+  // Restore to available if not already there
+  if(!st.available.includes(g) && !st.played.includes(g)) st.available.push(g);
+  save(); renderAll();
+}
 function restoreGame(g){ ['played','picked'].forEach(l=>{const i=st[l].indexOf(g); if(i>-1) st[l].splice(i,1);}); if(!st.available.includes(g)) st.available.push(g); save(); renderAll(); toast(`${g} disponible de nuevo`,'↺'); }
 
 function markAsPlayed(g){
