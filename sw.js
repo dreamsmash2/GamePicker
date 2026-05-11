@@ -1,4 +1,4 @@
-const CACHE = 'gamepicker-v1';
+const CACHE = 'gamepicker-v2';
 const ASSETS = [
   '/GamePicker/',
   '/GamePicker/index.html',
@@ -14,27 +14,42 @@ self.addEventListener('install', e=>{
   );
 });
 
-// Activate: delete old caches
+// Activate: delete old caches and take control immediately
 self.addEventListener('activate', e=>{
   e.waitUntil(
-    caches.keys().then(keys=>
-      Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
-    ).then(()=>self.clients.claim())
+    caches.keys()
+      .then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
   );
 });
 
-// Fetch: cache first, fallback to network
+// Fetch: network first for HTML (always get latest), cache first for assets
 self.addEventListener('fetch', e=>{
-  // Skip non-GET and cross-origin requests (Google APIs, fonts, etc.)
   if(e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if(url.origin !== location.origin) return;
 
+  // For HTML: network first so updates are always picked up
+  if(e.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')){
+    e.respondWith(
+      fetch(e.request)
+        .then(resp=>{
+          if(resp && resp.status===200){
+            const clone = resp.clone();
+            caches.open(CACHE).then(c=>c.put(e.request, clone));
+          }
+          return resp;
+        })
+        .catch(()=>caches.match(e.request)) // fallback to cache if offline
+    );
+    return;
+  }
+
+  // For other assets (icons, manifest): cache first
   e.respondWith(
     caches.match(e.request).then(cached=>{
       if(cached) return cached;
       return fetch(e.request).then(resp=>{
-        // Cache new same-origin responses
         if(resp && resp.status===200){
           const clone = resp.clone();
           caches.open(CACHE).then(c=>c.put(e.request, clone));
