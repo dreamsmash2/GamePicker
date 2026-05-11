@@ -257,34 +257,15 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
 /* VETO BADGE */
 .gcard-veto-badge{position:absolute;top:0;left:0;right:0;padding:4px 6px;background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,transparent 100%);font-family:'Cinzel',serif;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#F4A7C3;}
 
+/* MANUAL PICK */
+.manual-pick-row{display:flex;gap:8px;margin-bottom:1.4rem;align-items:center;}
+
 /* SURPRISE MODE */
 .surprise-card{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#251800,#181000);border:1px solid var(--gold-d);border-radius:var(--r);padding:12px 18px;animation:rollIn .45s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 16px var(--gold-glow);cursor:pointer;min-width:180px;}
 .surprise-front{font-family:'Cinzel',serif;font-size:28px;text-align:center;}
 .surprise-front small{display:block;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold-d);margin-top:4px;text-transform:uppercase;}
 .surprise-back{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold-l);text-align:center;line-height:1.4;}
 
-/* BGG SEARCH */
-.bgg-search-wrap{margin-bottom:1rem;position:relative;}
-.bgg-results{position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--ink3);border:1px solid var(--gold-d);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.6);max-height:360px;overflow-y:auto;}
-.bgg-result-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;}
-.bgg-result-item:last-child{border-bottom:none;}
-.bgg-result-item:hover{background:var(--ink4);}
-.bgg-result-img{width:44px;height:44px;border-radius:6px;object-fit:cover;background:var(--ink4);flex-shrink:0;border:1px solid var(--border2);}
-.bgg-result-ph{width:44px;height:44px;border-radius:6px;background:var(--ink4);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.bgg-result-info{flex:1;min-width:0;}
-.bgg-result-name{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bgg-result-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;}
-.bgg-result-meta span{display:flex;align-items:center;gap:3px;}
-.bgg-result-rating{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0;}
-.bgg-loading{padding:1rem;text-align:center;font-size:13px;color:var(--text3);font-style:italic;}
-.bgg-import-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
-.bgg-import-row input{font-family:'Crimson Pro',serif;font-size:14px;flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--ink3);color:var(--text);min-width:0;outline:none;}
-.bgg-import-row input:focus{border-color:var(--gold-d);}
-.bgg-import-row input::placeholder{color:var(--text4);font-style:italic;}
-.bgg-import-progress{margin-top:8px;font-size:12px;color:var(--text3);font-style:italic;padding:8px 10px;background:var(--ink3);border-radius:8px;border:1px solid var(--border);}
-.bgg-data-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
-.bgg-data-chip{font-size:9px;font-family:'Cinzel',serif;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--ink4);border:1px solid var(--border2);color:var(--text3);}
-.bgg-community-rating{font-size:9px;font-family:'Cinzel',serif;color:var(--gold-d);}
 
 /* STATS */
 .stats-kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:.5rem;}
@@ -388,6 +369,13 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <p class="picked-empty" id="pe">Pulsa <em>"Tirar los dados"</em> para que el destino elija por ti...</p>
       <div class="picked-cards" id="pc"></div>
     </div>
+    <div class="sec">Elegir manualmente</div>
+    <div class="manual-pick-row">
+      <select class="sel" id="manual-pick-sel" style="flex:1;min-width:0;">
+        <option value="">— Seleccionar juego —</option>
+      </select>
+      <button class="btn sm primary" id="btn-manual-pick">+ Añadir</button>
+    </div>
     <div class="sec">Ya jugados <span class="badge badge-blue" id="b-pl">0</span></div>
     <div class="game-list" id="played-list-picker"></div>
   </div>
@@ -404,18 +392,9 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
       <button class="btn sm" id="multisel-veto" style="color:#F4A7C3;border-color:#8B2252;">⏸ Vetar este finde</button>
       <button class="btn sm ghost" id="multisel-cancel">✕ Cancelar</button>
     </div>
-    <div class="bgg-search-wrap">
-      <div class="add-row">
-        <input type="text" id="add-in" placeholder="Buscar en BGG o escribir nombre..." autocomplete="off"/>
-        <button class="btn primary" id="btn-add">+ Añadir</button>
-        <button class="btn sm" id="btn-bgg-import" title="Importar colección de BGG">📥 BGG</button>
-      </div>
-      <div id="bgg-results" class="bgg-results" style="display:none;"></div>
-      <div id="bgg-import-row" class="bgg-import-row" style="display:none;">
-        <input type="text" id="bgg-user-input" placeholder="Tu usuario de BGG..." autocomplete="off"/>
-        <button class="btn sm primary" id="btn-bgg-import-go">Importar colección</button>
-        <button class="btn sm ghost" id="btn-bgg-import-cancel">✕</button>
-      </div>
+    <div class="add-row">
+      <input type="text" id="add-in" placeholder="Nombre del juego..." autocomplete="off"/>
+      <button class="btn primary" id="btn-add">+ Añadir</button>
     </div>
     <div class="filter-row" id="col-filter-row">
       <span class="filter-lbl">Filtrar</span>
@@ -447,6 +426,8 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
     <div id="stats-tags-chart"></div>
     <div class="sec">Estado de la colección</div>
     <div id="stats-status-chart"></div>
+    <div class="sec">Mis mejores juegos</div>
+    <div id="stats-rating-chart"></div>
   </div>
 
   <!-- SETTINGS -->
@@ -512,12 +493,9 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
   <div class="modal" style="text-align:center;max-width:420px;">
     <div style="font-size:52px;margin-bottom:1rem;">🎲</div>
     <h3 style="margin-bottom:.5rem;">Bienvenido a Game Picker</h3>
-    <p class="msub" style="margin-bottom:1.5rem;font-size:14px;line-height:1.7;">Tu biblioteca personal de juegos de mesa. Añade tus juegos buscando en BoardGameGeek o importa tu colección completa de BGG de un golpe.</p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="btn primary" id="welcome-bgg" style="width:100%;padding:12px;">📥 Importar mi colección de BGG</button>
-      <button class="btn" id="welcome-manual" style="width:100%;padding:12px;">✦ Empezar desde cero</button>
-    </div>
-    <p style="font-size:11px;color:var(--text4);margin-top:1rem;font-style:italic;">Puedes importar o añadir juegos en cualquier momento desde la pestaña Colección</p>
+    <p class="msub" style="margin-bottom:1.5rem;font-size:14px;line-height:1.7;">Tu biblioteca personal de juegos de mesa. Añade tus juegos desde la pestaña Colección y empieza a gestionar tus partidas.</p>
+    <button class="btn primary" id="welcome-manual" style="width:100%;padding:12px;">✦ ¡Empezar!</button>
+    <p style="font-size:11px;color:var(--text4);margin-top:1rem;font-style:italic;">Añade juegos en cualquier momento desde la pestaña Colección</p>
   </div>
 </div>
 
@@ -561,8 +539,6 @@ canvas.gcard-cover{width:100% !important;aspect-ratio:1/1;}
         </select>
       </div>
     </div>
-    <div class="note-lbl" style="margin-bottom:6px;">Icono <span style="color:var(--text4);font-weight:400;font-family:'Crimson Pro',serif;text-transform:none;letter-spacing:0;">(solo para juegos sin portada)</span></div>
-    <div class="emoji-grid" id="emoji-grid"></div>
     <div class="tag-grid" id="tag-grid"></div>
     <div class="note-lbl">Notas</div>
     <textarea class="note-area" id="note-area" rows="3" placeholder="Expansiones, estado, notas de reglas..."></textarea>
@@ -647,13 +623,13 @@ const TAGS = [
   {id:'solo',l:'Solitario',bg:'#1a1830',tc:'#AFA9EC',bc:'#3C3489'},
   {id:'coop',l:'Cooperativo',bg:'#081a10',tc:'#5DCAA5',bc:'#0F6E56'},
   {id:'comp',l:'Competitivo',bg:'#220e00',tc:'#F0997B',bc:'#993C1D'},
-  {id:'camp',l:'Campaña',bg:'#221400',tc:'#FAC775',bc:'#854F0B'},
-  {id:'campactiva',l:'Campaña en curso',bg:'#2a0a1a',tc:'#F4A7C3',bc:'#8B2252'},
   {id:'wargame',l:'Wargame',bg:'#0e1a08',tc:'#B5D97A',bc:'#4A7A10'},
   {id:'euro',l:'Euro',bg:'#0c1a04',tc:'#97C459',bc:'#3B6D11'},
   {id:'thema',l:'Temático',bg:'#220a0a',tc:'#F09595',bc:'#791F1F'},
   {id:'heavy',l:'Heavy',bg:'#181816',tc:'#B4B2A9',bc:'#5F5E5A'},
   {id:'medio',l:'Medio',bg:'#041228',tc:'#85B7EB',bc:'#185FA5'},
+  {id:'camp',l:'Campaña',bg:'#221400',tc:'#FAC775',bc:'#854F0B'},
+  {id:'campactiva',l:'Campaña en curso',bg:'#2a0a1a',tc:'#F4A7C3',bc:'#8B2252'},
 ];
 
 const INITIAL = []; // Nuevos usuarios empiezan con colección vacía
@@ -1085,7 +1061,14 @@ function addGame(){
     inp.style.borderColor='var(--red)'; setTimeout(()=>inp.style.borderColor='',1200);
     toast('Ya existe','⚠'); return;
   }
-  st.available.push(n); inp.value=''; save(); renderAll(); toast(`${n} añadido`,'✦');
+  st.available.push(n);
+  // Auto-assign emoji based on name hash
+  if(!st.meta[n]) st.meta[n]={tags:[],note:'',rating:0,status:'unplayed'};
+  if(!st.meta[n].emoji){
+    let h=0; for(const c of n) h=(h*31+c.charCodeAt(0))&0xffff;
+    st.meta[n].emoji = ALL_EMOJIS[h % ALL_EMOJIS.length];
+  }
+  inp.value=''; save(); renderAll(); toast(`${n} añadido`,'✦');
 }
 
 // ─── MULTI-SELECT ─────────────────────────────────────────────
@@ -1170,20 +1153,6 @@ function openModal(g){
   wrap.insertBefore(coverEl, wrap.firstChild);
   wrap.onclick = () => document.getElementById('img-file-input').click();
 
-  // Emoji picker
-  const eg = document.getElementById('emoji-grid'); eg.innerHTML='';
-  const curEmoji = getEmoji(g);
-  ALL_EMOJIS.forEach(em => {
-    const btn = document.createElement('button');
-    btn.className = 'emoji-opt' + (em===curEmoji?' sel-emoji':'');
-    btn.textContent = em; btn.dataset.em = em;
-    btn.onclick = () => {
-      eg.querySelectorAll('.emoji-opt').forEach(b=>b.classList.remove('sel-emoji'));
-      btn.classList.add('sel-emoji');
-    };
-    eg.appendChild(btn);
-  });
-
   // Tags
   const tg=document.getElementById('tag-grid'); tg.innerHTML='';
   TAGS.forEach(t=>{
@@ -1254,11 +1223,9 @@ function saveModal(){
   if(!modalGame) return;
   const tags=[...document.querySelectorAll('#tag-grid button[data-sel="1"]')].map(b=>b.dataset.id);
   const note=document.getElementById('note-area').value.trim();
-  const selEmoji=document.querySelector('#emoji-grid .sel-emoji');
-  const emoji=selEmoji?selEmoji.dataset.em:'';
   const rating = modalRating;
   const status=document.getElementById('status-sel').value;
-  st.meta[modalGame]={...st.meta[modalGame]||{},tags,note,emoji,rating,status};
+  st.meta[modalGame]={...st.meta[modalGame]||{},tags,note,rating,status};
   save(); renderAll();
   document.getElementById('modal').style.display='none';
   toast('Guardado','✓');
@@ -1382,9 +1349,8 @@ function renderAll(){
   document.getElementById('s-av').textContent=st.available.length;
   document.getElementById('s-pl').textContent=st.played.length;
   document.getElementById('s-hi').textContent=st.history.length;
-  document.getElementById('b-av').textContent=st.available.length;
+  // b-av and b-pl2 are updated in collection section with filtered counts
   document.getElementById('b-pl').textContent=st.played.length;
-  document.getElementById('b-pl2').textContent=st.played.filter(g=>!st.picked.includes(g)).length;
 
   // PICKER - picked cards
   const pe=document.getElementById('pe'), pc=document.getElementById('pc');
@@ -1412,6 +1378,18 @@ function renderAll(){
   const ppl=document.getElementById('played-list-picker'); ppl.innerHTML='';
   [...st.played].filter(g=>!st.picked.includes(g)).sort((a,b)=>a.localeCompare(b,'es')).forEach(g=>ppl.appendChild(makeGItem(g,{played:true,restore:true})));
 
+  // Manual pick selector - show filtered available games not yet picked
+  const manualSel = document.getElementById('manual-pick-sel');
+  const currentVal = manualSel.value;
+  manualSel.innerHTML='<option value="">— Seleccionar juego —</option>';
+  const pool = getFilteredPool().filter(g=>!st.picked.includes(g)).sort((a,b)=>a.localeCompare(b,'es'));
+  pool.forEach(g=>{
+    const opt=document.createElement('option');
+    opt.value=g; opt.textContent=g;
+    manualSel.appendChild(opt);
+  });
+  if(currentVal && pool.includes(currentVal)) manualSel.value=currentVal;
+
   // COLLECTION
   const ag=document.getElementById('avail-grid'); ag.innerHTML='';
   let availToShow = [...st.available].sort((a,b)=>a.localeCompare(b,'es'));
@@ -1427,8 +1405,11 @@ function renderAll(){
       return meta&&meta.tags&&meta.tags.some(t=>activeColFilters.has(t));
     });
   }
+  // Update badges with filtered counts
+  document.getElementById('b-av').textContent = availToShow.length;
+  document.getElementById('b-pl2').textContent = playedToShow.length;
   availToShow.forEach(g=>ag.appendChild(makeGCard(g)));
-  document.getElementById('played-sec').style.display=playedOnly.length?'':'none';
+  document.getElementById('played-sec').style.display=playedToShow.length?'':'none';
   const pg=document.getElementById('played-grid'); pg.innerHTML='';
   playedToShow.forEach(g=>pg.appendChild(makeGCard(g,{played:true})));
 
@@ -1602,6 +1583,22 @@ function renderStats(){
       <div class="stats-bar-track" style="flex:2"><div class="stats-bar-fill" style="width:${Math.round(v/maxS*100)}%;background:linear-gradient(90deg,${sm.bc},${sm.tc})"></div></div>
       <span class="stats-bar-val">${v}</span>
     </div>`;}).join('');
+
+  // Rating distribution - games with ratings sorted by score
+  const ratingEl = document.getElementById('stats-rating-chart');
+  const rated = allGames.map(g=>({g, r:st.meta[g]?.rating||0})).filter(x=>x.r>0).sort((a,b)=>b.r-a.r);
+  if(!rated.length){
+    ratingEl.innerHTML='<p class="stats-empty">Todavía no has valorado ningún juego.</p>';
+  } else {
+    ratingEl.innerHTML = rated.map(({g,r})=>{
+      const stars = Math.round(r/2);
+      return `<div class="stats-bar-row">
+        <span class="stats-bar-label">${g}</span>
+        <span style="color:var(--gold);font-size:11px;flex-shrink:0;">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span>
+        <span class="stats-bar-val">${r}/10</span>
+      </div>`;
+    }).join('');
+  }
 }
 
 // ─── TABS ────────────────────────────────────────────────────
@@ -1616,6 +1613,20 @@ document.querySelectorAll('.tab').forEach(t=>{
 });
 
 // ─── EVENTS ──────────────────────────────────────────────────
+// Manual game pick
+document.getElementById('btn-manual-pick').onclick=()=>{
+  const sel = document.getElementById('manual-pick-sel');
+  const g = sel.value; if(!g) return;
+  if(st.picked.includes(g)){ toast('Ese juego ya está elegido esta semana','⚠'); return; }
+  // Remove from available temporarily like a normal pick
+  st.picked.push(g);
+  const i = st.available.indexOf(g); if(i>-1) st.available.splice(i,1);
+  sel.value='';
+  save(); renderAll();
+  document.getElementById('btn-confirm').style.display='';
+  document.getElementById('btn-cancel').style.display='';
+};
+
 document.getElementById('btn-pick').onclick=pickGames;
 document.getElementById('btn-confirm').onclick=confirmPlayed;
 document.getElementById('btn-cancel').onclick=cancelPick;
@@ -1971,215 +1982,6 @@ document.getElementById('gd-save-btn').onclick = gdSave;
 document.getElementById('gd-load-btn').onclick = gdLoad;
 document.getElementById('gd-disconnect-btn').onclick = gdDisconnect;
 
-// ─── BGG INTEGRATION ─────────────────────────────────────────
-const BGG_PROXY = 'https://gamepicker-bgg.dreamsmash.workers.dev';
-let bggSearchTimer = null;
-let bggSearchActive = false;
-
-// Search BGG as user types
-document.getElementById('add-in').addEventListener('input', e=>{
-  const q = e.target.value.trim();
-  clearTimeout(bggSearchTimer);
-  const resultsEl = document.getElementById('bgg-results');
-  if(q.length < 2){ resultsEl.style.display='none'; return; }
-  bggSearchTimer = setTimeout(()=>bggSearch(q), 500);
-});
-
-document.getElementById('add-in').addEventListener('keydown', e=>{
-  if(e.key==='Escape') closeBggResults();
-  if(e.key==='Enter'){
-    closeBggResults();
-    addGame();
-  }
-});
-
-document.addEventListener('click', e=>{
-  if(!e.target.closest('.bgg-search-wrap')) closeBggResults();
-});
-
-function closeBggResults(){
-  document.getElementById('bgg-results').style.display='none';
-}
-
-async function bggSearch(q){
-  const resultsEl = document.getElementById('bgg-results');
-  resultsEl.innerHTML='<div class="bgg-loading">🔍 Buscando en BoardGameGeek...</div>';
-  resultsEl.style.display='';
-  try{
-    const r = await fetch(`${BGG_PROXY}/search?q=${encodeURIComponent(q)}`);
-    const items = await r.json();
-    if(!items.length){ resultsEl.innerHTML='<div class="bgg-loading">Sin resultados. Pulsa + Añadir para añadirlo manualmente.</div>'; return; }
-    resultsEl.innerHTML='';
-    items.forEach(item=>{
-      const div=document.createElement('div'); div.className='bgg-result-item';
-      const em = EMOJI[item.name]||'🎲';
-      div.innerHTML=`
-        <div class="bgg-result-ph">${em}</div>
-        <div class="bgg-result-info">
-          <div class="bgg-result-name">${item.name}</div>
-          <div class="bgg-result-meta"><span>${item.year||'?'}</span></div>
-        </div>`;
-      div.onclick=()=>bggAddGame(item.id, item.name);
-      resultsEl.appendChild(div);
-    });
-  }catch(e){
-    resultsEl.innerHTML='<div class="bgg-loading">⚠ Error al conectar con BGG. Añade el juego manualmente.</div>';
-  }
-}
-
-async function bggAddGame(id, name){
-  closeBggResults();
-  document.getElementById('add-in').value='';
-  // Check duplicate
-  if([...st.available,...st.played].some(g=>g.toLowerCase()===name.toLowerCase())){
-    toast('Ese juego ya está en la colección','⚠'); return;
-  }
-  toast(`Añadiendo ${name}...`,'⏳');
-  try{
-    const r = await fetch(`${BGG_PROXY}/thing?id=${id}`);
-    const data = await r.json();
-    const gameName = data.name || name;
-    // Add to collection
-    st.available.push(gameName);
-    if(!st.meta[gameName]) st.meta[gameName]={tags:[],note:'',emoji:'',rating:0,status:'unplayed'};
-    // Store BGG data in meta
-    st.meta[gameName].bggId = id;
-    st.meta[gameName].bggRating = data.rating;
-    st.meta[gameName].minPlayers = data.minPlayers;
-    st.meta[gameName].maxPlayers = data.maxPlayers;
-    st.meta[gameName].minTime = data.minTime;
-    st.meta[gameName].maxTime = data.maxTime;
-    st.meta[gameName].weight = data.weight;
-    st.meta[gameName].year = data.year;
-    // Save image
-    if(data.imgBase64){ imgs[gameName]=data.imgBase64; saveImgs(); }
-    save(); renderAll();
-    toast(`${gameName} añadido con portada de BGG`,'✦');
-  }catch(e){
-    // Add without image
-    if(![...st.available,...st.played].some(g=>g.toLowerCase()===name.toLowerCase())){
-      st.available.push(name); save(); renderAll();
-    }
-    toast(`${name} añadido (sin datos BGG)`,'✦');
-  }
-}
-
-// BGG Import
-document.getElementById('btn-bgg-import').onclick=()=>{
-  const row = document.getElementById('bgg-import-row');
-  row.style.display = row.style.display==='none' ? '' : 'none';
-};
-document.getElementById('btn-bgg-import-cancel').onclick=()=>{
-  document.getElementById('bgg-import-row').style.display='none';
-};
-document.getElementById('btn-bgg-import-go').onclick=bggImportCollection;
-
-async function bggImportCollection(){
-  const user = document.getElementById('bgg-user-input').value.trim();
-  if(!user){ toast('Escribe tu usuario de BGG','⚠'); return; }
-  const btn = document.getElementById('btn-bgg-import-go');
-  btn.disabled=true; btn.textContent='Cargando...';
-  // Show progress
-  const wrap = document.querySelector('.bgg-search-wrap');
-  let progressEl = document.getElementById('bgg-import-progress');
-  if(!progressEl){
-    progressEl=document.createElement('div'); progressEl.id='bgg-import-progress';
-    progressEl.className='bgg-import-progress'; wrap.appendChild(progressEl);
-  }
-  progressEl.textContent='Conectando con BGG...';
-  try{
-    // BGG sometimes returns 202 (queued), retry up to 3 times
-    let items=[], attempts=0;
-    while(attempts<3){
-      const r = await fetch(`${BGG_PROXY}/collection?user=${encodeURIComponent(user)}`);
-      const data = await r.json();
-      if(data.status==='queued'){
-        progressEl.textContent=`BGG está procesando la solicitud... intento ${attempts+1}/3`;
-        await new Promise(res=>setTimeout(res,3000));
-        attempts++; continue;
-      }
-      items=data; break;
-    }
-    if(!items.length){ progressEl.textContent='No se encontraron juegos o usuario incorrecto.'; btn.disabled=false; btn.textContent='Importar colección'; return; }
-
-    progressEl.textContent=`Encontrados ${items.length} juegos. Importando imágenes...`;
-    let added=0, skipped=0;
-    const all=[...st.available,...st.played];
-    // Add games without images first
-    items.forEach(item=>{
-      if(all.some(g=>g.toLowerCase()===item.name.toLowerCase())){ skipped++; return; }
-      st.available.push(item.name);
-      if(!st.meta[item.name]) st.meta[item.name]={tags:[],note:'',emoji:'',rating:0,status:'unplayed'};
-      st.meta[item.name].bggId=item.id; st.meta[item.name].year=item.year;
-      added++;
-    });
-    save(); renderAll();
-    progressEl.textContent=`✓ ${added} juegos añadidos, ${skipped} ya existían. Cargando portadas...`;
-
-    // Fetch images in background, 3 at a time
-    const toFetch = items.filter(item=>{
-      const inColl=[...st.available,...st.played].find(g=>g.toLowerCase()===item.name.toLowerCase());
-      return inColl && !imgs[inColl] && item.thumb;
-    }).slice(0,60); // max 60 images
-
-    let done=0;
-    for(let i=0;i<toFetch.length;i+=3){
-      const batch=toFetch.slice(i,i+3);
-      await Promise.all(batch.map(async item=>{
-        try{
-          const r=await fetch(`${BGG_PROXY}/thing?id=${item.id}`);
-          const data=await r.json();
-          const gameName=[...st.available,...st.played].find(g=>g.toLowerCase()===item.name.toLowerCase());
-          if(gameName&&data.imgBase64){ imgs[gameName]=data.imgBase64; }
-          // Store extra data
-          if(gameName&&st.meta[gameName]){
-            if(data.bggRating) st.meta[gameName].bggRating=data.bggRating;
-            if(data.minPlayers) st.meta[gameName].minPlayers=data.minPlayers;
-            if(data.maxPlayers) st.meta[gameName].maxPlayers=data.maxPlayers;
-            if(data.minTime) st.meta[gameName].minTime=data.minTime;
-            if(data.maxTime) st.meta[gameName].maxTime=data.maxTime;
-            if(data.weight) st.meta[gameName].weight=data.weight;
-          }
-          done++;
-        }catch(e){}
-      }));
-      saveImgs(); save(); renderAll();
-      progressEl.textContent=`Cargando portadas... ${done}/${toFetch.length}`;
-    }
-    progressEl.textContent=`✓ Importación completada. ${added} juegos añadidos con portadas.`;
-    setTimeout(()=>{ progressEl.remove(); document.getElementById('bgg-import-row').style.display='none'; },3000);
-  }catch(e){
-    progressEl.textContent='⚠ Error al importar. Comprueba el usuario e inténtalo de nuevo.';
-  }
-  btn.disabled=false; btn.textContent='Importar colección';
-}
-
-// ─── WELCOME SCREEN ───────────────────────────────────────────
-function checkWelcome(){
-  const allGames = [...st.available, ...st.played];
-  if(allGames.length === 0 && !localStorage.getItem('gp_welcomed')){
-    document.getElementById('welcome-overlay').style.display='flex';
-  }
-}
-
-document.getElementById('welcome-bgg').onclick=()=>{
-  document.getElementById('welcome-overlay').style.display='none';
-  localStorage.setItem('gp_welcomed','1');
-  // Switch to collection tab and open import row
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelector('[data-tab="collection"]').classList.add('active');
-  ['picker','collection','history','stats','settings'].forEach(id=>
-    document.getElementById('tab-'+id).style.display=id==='collection'?'':'none'
-  );
-  document.getElementById('bgg-import-row').style.display='';
-  document.getElementById('bgg-user-input').focus();
-};
-
-document.getElementById('welcome-manual').onclick=()=>{
-  document.getElementById('welcome-overlay').style.display='none';
-  localStorage.setItem('gp_welcomed','1');
-};
-
 // ─── SERVICE WORKER ───────────────────────────────────────────
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
@@ -2189,11 +1991,25 @@ if('serviceWorker' in navigator){
   });
 }
 
+// ─── WELCOME SCREEN ───────────────────────────────────────────
+function checkWelcome(){
+  if([...st.available,...st.played].length===0 && !localStorage.getItem('gp_welcomed')){
+    document.getElementById('welcome-overlay').style.display='flex';
+  }
+}
+document.getElementById('welcome-manual').onclick=()=>{
+  document.getElementById('welcome-overlay').style.display='none';
+  localStorage.setItem('gp_welcomed','1');
+};
+
 // ─── INIT ─────────────────────────────────────────────────────
 loadImgs();
 load();
 loadGD();
+buildFilterRow();
+updateFilterInfo();
 renderAll();
+checkWelcome();
 </script>
 </body>
 </html>
