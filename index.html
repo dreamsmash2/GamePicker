@@ -1378,7 +1378,15 @@ function renderAll(){
       const ce=makeCoverEl(g,46,46);
       ce.style.cssText=ce.tagName==='CANVAS'?'width:46px;height:46px;display:block;':'width:46px;height:46px;object-fit:cover;display:block;';
       cw.appendChild(ce); d.appendChild(cw);
-      d.insertAdjacentHTML('beforeend',`<span class="pcard-name">${g}</span><button class="pcard-rm" onclick="unpick(${JSON.stringify(g)})">✕</button>`);
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'pcard-name';
+      nameSpan.textContent = g;
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'pcard-rm';
+      rmBtn.textContent = '✕';
+      rmBtn.addEventListener('click', (e) => { e.stopPropagation(); unpick(g); });
+      d.appendChild(nameSpan);
+      d.appendChild(rmBtn);
       pc.appendChild(d);
     }
   });
