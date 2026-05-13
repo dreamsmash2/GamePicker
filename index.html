@@ -1395,31 +1395,25 @@ function renderAll(){
   const ppl=document.getElementById('played-list-picker'); ppl.innerHTML='';
   [...st.played].filter(g=>!st.picked.includes(g)).sort((a,b)=>a.localeCompare(b,'es')).forEach(g=>ppl.appendChild(makeGCard(g,{played:true,restore:true})));
 
-  // Manual pick selector - all available games including campaign ones, minus already picked
+  // Manual pick selector - ALL games in collection (available + played), minus already picked this session
   const manualSel = document.getElementById('manual-pick-sel');
   const currentVal = manualSel.value;
   manualSel.innerHTML='<option value="">— Seleccionar juego —</option>';
-  // All available games sorted, including campaign (excluded from random but available manually)
-  const manualPool = [...st.available].filter(g=>!st.picked.includes(g)).sort((a,b)=>a.localeCompare(b,'es'));
-  // Apply filters if active, but always include campaign games
   const CAMP_TAGS = ['camp','campactiva'];
-  const filtered = activeFilters.size>0
-    ? manualPool.filter(g=>{
-        const meta=st.meta[g];
-        const isCampaign = meta&&meta.tags&&meta.tags.some(t=>CAMP_TAGS.includes(t));
-        if(isCampaign) return true; // always include campaign in manual
-        return meta&&meta.tags&&meta.tags.some(t=>activeFilters.has(t));
-      })
-    : manualPool;
-  filtered.forEach(g=>{
+  // Include all games, both available and played
+  const allGamesForManual = [...new Set([...st.available, ...st.played])]
+    .filter(g=>!st.picked.includes(g))
+    .sort((a,b)=>a.localeCompare(b,'es'));
+  allGamesForManual.forEach(g=>{
     const opt=document.createElement('option');
     opt.value=g;
     const meta=st.meta[g];
     const isCampaign=meta&&meta.tags&&meta.tags.some(t=>CAMP_TAGS.includes(t));
-    opt.textContent=g+(isCampaign?' 📖':'');
+    const isPlayed=st.played.includes(g);
+    opt.textContent=g+(isCampaign?' 📖':isPlayed?' ✓':'');
     manualSel.appendChild(opt);
   });
-  if(currentVal && filtered.includes(currentVal)) manualSel.value=currentVal;
+  if(currentVal && allGamesForManual.includes(currentVal)) manualSel.value=currentVal;
 
   // COLLECTION - all games together (available + played), filterable
   const ag=document.getElementById('avail-grid'); ag.innerHTML='';
@@ -1644,8 +1638,8 @@ document.getElementById('btn-manual-pick').onclick=()=>{
   const sel = document.getElementById('manual-pick-sel');
   const g = sel.value; if(!g) return;
   if(st.picked.includes(g)){ toast('Ese juego ya está elegido esta semana','⚠'); return; }
-  // Remove from available temporarily like a normal pick
   st.picked.push(g);
+  // Only remove from available if it's there — played games stay in played list
   const i = st.available.indexOf(g); if(i>-1) st.available.splice(i,1);
   sel.value='';
   save(); renderAll();
